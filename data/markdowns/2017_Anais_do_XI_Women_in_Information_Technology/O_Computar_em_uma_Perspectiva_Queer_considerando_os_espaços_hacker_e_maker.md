@@ -1,0 +1,57 @@
+# O Computar em uma Perspectiva Queer: considerando os espaços hacker e maker
+
+Leander Cordeiro de Oliveira, Marília Abrahão Amaral
+
+1Programa de Pós-graduação em Tecnologia e Sociedade– Universidade Tecnológica Federal do Paraná (UTFPR)
+
+`leander@alunos.utfpr.edu.br, mariliaa@utfpr.edu.br`
+
+Abstract. Sociocultural constructions and reconstructions are constant and this process is based on the values that are permeated among people. Computation and its environments, systems and people experience this process and can end up constructing normative and exclusionary situations. It is through these constant changes that this article intends to present a theoretical debate about the normativities of the area, understanding the Hacker and Maker movements and the deconstructions proposed by Queer Theory as a possibility for an opening.
+
+Resumo. Construções e reconstruções socioculturais são constantes e este processo se pauta nos valores que estão permeados entre os sujeitos. O fazer computacional e seus ambientes, sistemas e sujeitos vivenciam este processo e podem acabar construindo situações normativas e excludentes. É por meio destas constantes mudanças que o presente artigo pretende apresentar um debate teórico acerca das normatividades da área, compreendendo como uma possibilidade de abertura os movimentos Hacker e Maker e as desconstruções propostas pela Teoria Queer.
+
+## 1. Introdução e Contexto da Pesquisa
+
+Espaços podem ser construídos carregando diferentes valores, advindos de lutas de poder, que enviesam suas ocupações e delimitações [HALL, 1997]. A constituição dos espaços, também compreendidos aqui como cultura, onde se dá o fazer computacional passa por este processo, constituindo-se por meio de valores e práticas advindas de um contexto sociocultural que representa as relações entre os sujeitos e suas percepções envolvidas nestes processos.
+
+Conforme escreveu Butler (2009), situações opressoras, marginalizadoras e até mesmo de violência podem surgir em diferentes contextos, sendo um deles relacionado aos indivíduos que não vivenciam gênero e sexualidade dentro da matriz normativa de valores sociais. Algumas pesquisas, por meio de relatos e estatísticas, vêm demonstrando que grupos que fogem aos padrões normatizados de gênero e sexualidade não se sentem satisfatoriamente representados nos ambientes onde se constrói a computação, incluindo outros espaços educacionais, dando o sinal de situações normativas e excludentes [Associação Brasileira de Lésbicas, Gays, Bissexuais, Travestis e Transexuais, 2016; Stout; Wright, 2016; Trenshaw et al., 2013].
+
+Questionar a construção dos espaços em que o computar é feito torna-se importante para problematizar a construção de normatividades na cultura da área. Alguns espaços informais, compreendidos aqui por meio dos movimentos Hacker e
+
+Maker, são uma possibilidade para aberturas neste sentido. Dessa forma, este documento pretende apresentar perspectivas teóricas para uma reflexão acerca do que se compreende como uma cultura da área da computação e como pode ser possível romper as hegemonias culturais normativas percebidas por meio desta observação.
+
+## 2. Alguns movimentos e espaços
+
+O movimento Hacker surgiu entre as décadas de 50 e 60 no Massachusetts Institute of Technology (MIT) entre um grupo de jovens aficionados por ferromodelismo [Levy, 2001]. Este grupo desenvolvia artefatos para aprimorar seus projetos e o espaço que tinha disponível. Dessa relação surgiram palavras utilizadas pelos participantes na comunicação, construindo um vocabulário. Dentre os termos, está o hack que significa um projeto desenvolvido não necessariamente com um objetivo construtivo, mas por algum prazer selvagem ou o puro envolvimento [Levy, 2001]. Este termo acabou por influenciar o nome do movimento que se desenvolveu a partir de então, pautado em seu significado original.
+
+O movimento Maker se intersecciona com o Hacker em diversos aspectos. Apesar de não haver um consenso sobre as diferenças entre estes espaços [Mattos, 2015], no movimento Maker há um envolvimento de artefatos físicos e da ideia de construção e prototipagem, podendo extrapolar artefatos digitais e eletrônicos, estes mais relacionados ao Hacker. Blikstein (2013) relata que em meados dos anos 2000, pesquisadores e educadores passaram a demonstrar interesses nestes movimentos em espaços educativos, desenvolvendo ações para proporcionar laboratórios dessa natureza, principalmente nos Estados Unidos. Acerca desta relação crescente em contextos educacionais, é possível a construção do conhecimento acontecer de maneira mais significativa com a manipulação de artefatos físicos em situações contextualizadas com as realidades do sujeito ou sua comunidade [Freire, 1983].
+
+Apesar da visão progressista frente às problemáticas da educação, é importante construir uma reflexão crítica acerca dos sujeitos envolvidos nos espaços onde o computar é concebido. Por meio dos variados sistemas de significados que os sujeitos utilizam para conceber e regular condutas, a ação social torna-se significativa tanto para aqueles que estão diretamente envolvidos, quanto para aqueles que estão em seu entorno [Hall, 1997]. Com esta reflexão, indaga-se a possibilidade de os movimentos Hacker e Maker poderem ser compreendidos como potenciais espaços para a construção coletiva de empoderamento e apropriação do fazer computacional para a diferença.
+
+Para a compreensão acerca dos espaços onde a computação é construída, é preciso extrapolar os ambientes formais e institucionais. Dessa forma, compreendem-se diferentes tipos de espaços onde distintos processos educacionais se desdobram. Alguns laboratórios e iniciativas comunitárias figuram nesta perspectiva, aliando valores de liberdade e experimentação, advindos da cultura hacker. Estes espaços podem ser importantes para a construção cultural da área, pois muitas vezes atuam no papel de envolvimento inicial com a computação. A presença da diferença nestes ambientes é um importante caminho para repensar a computação, na dialógica entre diferença e norma.
+
+## 3. Gênero e Sexualidade
+
+Os autores Hall (1997) e Louro (2016) debatem os processos culturais de maneira a compreender as construções e desconstruções constantes. Ao tratar dos
+
+> 1 Algumas iniciativas brasileiras que seguem esta perspectiva e podem ser citadas são o MariaLab Hackerspace <http://marialab.org/>, o Olabi Makerspace < http://olabi.co/> e sua iniciativa PretaLab <https://olabi.typeform.com/to/qe4tsA>, a iniciativa Progra{m}aria < https://www.programaria.org/>.
+
+tensionamentos existentes dentro das questões de gênero e sexualidade, é importante pensar em uma abertura dialógica onde os sujeitos possam compreender a diferença e absorver as vivências e saberes de cada um. Ao envolver valores de colaboração, conhecimento e liberdade, a cultura hacker apresenta uma forte relação de empoderamento e busca de conhecimento por desejo e desafio [Varga; Diaz, 2012], apresentando-se como um espaço possível para uma convivência dialógica.
+
+Uma vez que a constituição da individualidade se dá na observação e marcação da diferença no outro, assim vindo a delimitar os espaços, é importante para os sujeitos legitimados se manterem em posição “não contaminada” em relação ao seu diferente, para que assim se sustentem as hierarquias [Louro, 2016]. É por meio da busca de quebras nestas relações que se pautam as transgressões à hierarquização de grupos sociais, que se espera alcançar uma cultura de compreensão crítica à heterogeneidade entre sujeitos.
+
+Neste sentido, Louro (2016), traz uma compreensão mais ampla do que se denomina por Teoria Queer, afirmando que não existe, contudo, uma homogeneidade de propostas, políticas, metodologias, mas sim um teor descentrador e desconstrutivo, com propostas de rupturas epistemológicas visando novas maneiras de conhecer. Louro (2016) destaca que existe uma centralidade dos debates queer acerca do binarismo heterossexualidade/homossexualidade, uma vez que os teóricos a compreendem como uma importante articuladora sociocultural. A Teoria Queer pode ser definida como pósidentitária, transpondo o foco de análise, perpassando pela cultura, para as estruturas linguísticas e discursivas e seus contextos institucionais. Constrói-se assim uma política de conhecimento cultural, que busca compreender outra forma de pensar, saber e conhecer.
+
+## 3. Desdobramentos na Educação
+
+Os espaços Hacker e Maker podem ser analisados dentro da perspectiva de espaços formadores. Desta forma, é possível questionar as estruturas dentro das perspectivas apontadas por Louro (2016). A formação dos sujeitos acontece de maneira que enviesa as relações de poder e saber, em configurações que muitas vezes acabam por desconsiderar a diferença nestes processos. A educação pensada para a hegemonia é problematizada por meio da proposta de uma concepção pedagógica pautada no atrito entre diferença e norma, permitindo reconfigurar papéis no decorrer deste processo.
+
+O ato de estranhar o currículo diz respeito a um movimento de desconcertá-lo, transtorná-lo, ultrapassar seus limites. É um caminho que faz com que se desconfie do que está posto, em benefício ao que se pode vir a saber. Não se trata de incorporar novos sujeitos ao currículo, mas sim de questionar o corpo de conhecimentos que está posto, os caminhos que levaram a tal e ainda a necessidade da existência deste corpo de conhecimentos pré-estabelecido e visto como seguro [Louro, 2016].
+
+A concepção sexo-gênero-sexualidade, que naturaliza em uma perspectiva biologicista os estereótipos de gênero e os comportamentos sexuais, está presente no currículo, fazendo deste um texto generificado e sexualizado. A lógica que pressupõe sexo como algo natural, que indica o gênero e, por fim, o desejo sexual, acaba por construir a ideia de uma heterossexualidade e cisgeneridade compulsórias, reservando situações abjetas aos sujeitos que não habitam a centralidade deste currículo.
+
+O binarismo conhecimento/ignorância é problematizado por Louro (2016) que aponta a importância de compreender a ignorância como uma maneira de saber. A ignorância é colocada como uma implicação do conhecimento, não uma incapacidade
+
+cognitiva de aprender algo. É concebida dentro da ideia da existência de limites de saber, também presentes no polo do conhecimento, demonstrando que todos os conjuntos de saberes são limitados, pensados dentro de uma lógica condizente com os sujeitos e processos que a formam. A resistência em aprender é colocada em uma perspectiva cultural, demonstrando que a compreensão acerca deste tipo de construção pode trazer algumas respostas acerca da recusa de aceitação da diferença, uma vez que esta ultrapassa os saberes de determinado grupo e invade outro conjunto de conhecimentos, cada um com suas próprias barreiras.
+
+A construção de espaços hacker / maker em uma perspectiva queer poderia tensionar os saberes de forma a expandir as barreiras do corpo de conhecimentos que existe entre norma e diferença e o que se espera de um fazer computacional. Isso faz com que seja importante pensar fora da lógica segura e ultrapassar os limites esperados para que estes saberes se tornem transponíveis e as situações abjetas diminuam. É por meio da curiosidade que tais espaços podem ser pensados, estimulando novos processos e transformando as relações educativas por meio da incorporação de diferentes perspectivas.

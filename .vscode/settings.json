@@ -1,4 +1,6 @@
 {
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
   "window.zoomLevel": 0,
   "breadcrumbs.enabled": true,
   "editor.fontSize": 14,
@@ -39,7 +41,7 @@
       "source.organizeImports.ruff": "explicit"
     }
   },
-  "python.defaultInterpreterPath": "./.venv/bin/python Mac/Linux",
+  "python.defaultInterpreterPath": "./.venv/bin/python",
   "python.analysis.autoImportCompletions": true,
   "python.terminal.activateEnvInCurrentTerminal": true,
   "python.terminal.activateEnvironment": true,

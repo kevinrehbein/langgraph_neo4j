@@ -1,0 +1,73 @@
+# A vida de Ada Lovelace em um circuito de atividades desplugadas
+
+Sílvia Amélia Bim, Rosiane de Freitas, Cristiano Maciel, Mory Márcia Lobo, Larissa da Silva Pessoa, Fernanda Gabriela de Sousa Pires, Jean Rangel, João Ricardo Serique Bernado, Karla Susiane dos Santos Pereira
+
+1Universidade Tecnológica Federal do Paraná (UTFPR) – Curitiba, PR - Brasil 2Instituto de Computação– Universidade Federal do Amazonas (UFAM) – Manaus, AM
+
+- Brasil
+
+3Instituto de Computação– Universidade Federal de Mato Grosso (UFMT) – Cuiabá, MT – Brasil
+
+4Programa de Pós-graduação em Educação– Universidade Federal de Mato Grosso (UFMT) – Cuiabá, MT - Brasil
+
+5Escola Superior de Tecnologia –Universidade do Estado do Amazonas (UEA) – Manaus, AM – Brasil
+
+<mark>`sabim@utfpr.edu.br, rosiane@icomp.ufam.edu.br, cmaciel@ufmt.br, moryprofessora@hotmail.com, {lsp,fernanda.pires@icomp.ufam.edu.br}, jeanrangel@alunos.utfpr.edu.br, jrsbr.lic16@uea.edu.br, karla.pereira@icomp.ufam.edu.br`</mark>
+
+Abstract. Ada Lovelace's life is a source of inspiration for women and men of all ages, for being a bright-eyed and visionary person. Her greatest achievement was to have drawn up what is considered the first computer program in history. This article presents a methodological proposal for the didactic use of a children's book about the life of Ada Lovelace, through the proposition of a circuit of unplugged activities, to work on the pillars of computational thinking in children and adolescents. This approach was applied in a workshop at the LAWCC – CLEI 2018 (X Congress of Latin American Women in Computing - Latin American Conference on Informatics). A qualiquantitative analysis was performed, indicating the suitability of the proposal.
+
+Resumo. A vida de Ada Lovelace é uma fonte de inspiração para mulheres e homens de todas as idades, por ter sido uma pessoa de mente brilhante e visionária. Seu feito maior foi ter elaborado o que é considerado o primeiro programa de computador da história. Neste artigo, é apresentada uma proposta metodológica para uso didático de um livro infantil sobre a vida de Ada Lovelace, pela proposição de um circuito de atividades desplugadas, com vistas a se trabalhar os pilares do pensamento computacional em crianças e adolescentes. Tal abordagem foi aplicada em uma oficina no LAWCC – CLEI 2018(X Congresso da Mulher Latino-americana em Computação – Conferência Latino-americana em Informática). Uma análise quali-quantitativa foi realizada, indicando a adequabilidade da atividade proposta.
+
+## 1. Introdução
+
+A história geralmente é contada segundo as tradições culturais vigentes e por aqueles que ocupam postos de comandos e liderança, que têm sido eminentemente homens do sexo
+
+masculino. Os feitos de mulheres, em geral, não aparecem na história como atribuídos as mesmas, sendo que, na maioria das vezes um homem levava o mérito e o lugar na história. Uma exceção é o da matemática Ada Lovelace, por muitos conhecida como filha do famoso poeta inglês Lord Byron, mas, que foi a responsável por elaborar o primeiro programa de computador.
+
+Um programa de computador é um conjunto de instruções que descrevem uma tarefa a ser realizada por uma máquina determinística eletrônica, um computador. E, o interessante é que o programa surgiu antes mesmo do desenvolvimento do computador eletrônico em si. Foi justamente a Ada Lovelace, uma matemática brilhante, que com muita criatividade e imaginação, elaborou a sequência de passos e fórmulas, um algoritmo em pseudocódigo, para calcular os números de Bernoulli através da máquina analítica de Charles Babbage, publicando o trabalho em 1843 [Menabrea, 1843].
+
+Existem muitos livros que contam a linda trajetória de vida de Ada Lovelace e seus feitos. Neste estudo, usamos um destes livros (Bim, 2018), como referência para estruturar atividades didáticas com o intuito de se trabalhar o pensamento computacional e repassar conceitos interessantes da área da Computação, sem a necessidade do uso do computador, o que na literatura se conhece por computação desplugada. A computação desplugada se dá por meio de atividades lúdicas, dinâmicas de grupo e elaboração de materiais. Bell et al. (2015) se preocuparam em solucionar questões que podem surgir logo quando somos introduzidos em computação: como funcionam e o que resolvem os computadores? O livro de tais autores, intitulado “ CS unplugged: Computer Science without a Computer ”, conta com várias atividades que podem ser reproduzidas com crianças de maneira fácil e intuitiva. De forma lúdica, os conhecimentos do mundo da Computação são transmitidos, atenuando a dificuldade inicial que o uso do computador pode causar.
+
+Em um contexto mais amplo, muito se tem discutido sobre pensamento computacional (do inglês, computational thinking - CT). Para Wing (2017), CT se refere a um conjunto de habilidades humanas essenciais à boa resolução de problemas, envolvendo: i) reformular um problema através de problemas menores (decomposição), ii) priorizar características principais ao invés de detalhes (abstração), iii) associar o problema a outros já conhecidos (reconhecimento de padrões) e iv) estabelecer tarefas passo-a-passo para resolver o problema (algoritmos).
+
+Com base nestes pressupostos, neste trabalho, é descrita uma proposta de oficina com atividades desplugadas, inspirada pela vida de Ada Lovelace, para auxílio no desenvolvimento do pensamento computacional em crianças e adolescentes. A oficina foi realizada durante o evento latino americano de mulheres em computação, LAWCC 2018 (X Congresso da Mulher Latino-americana em Computação), integrante do CLEI (Conferência Latino-americana em Informática). A análise dos dados sucintamente apresentada considera, entre outros, o gênero dos participantes.
+
+A realização de oficinas e eventos com este propósito, de trabalhar o pensamento computacional com atividades lúdicas e criativas, plugadas e desplugadas, vem acontecendo em diversas esferas. A Rede Brasileira de Aprendizagem Criativa (baseado no “ Lifelong Kindergarten Group ” do MIT Media Lab ) (RBAC, 2019), que envolve educadores, artistas, empreendedores e entidades públicas e privadas, fomenta tais ações. O Scratch Day (proposto pelo MIT para uso do ambiente de programação visual em blocos Scratch) tem disso uma delas. O evento BEPECO (Brincando de Pensamento
+
+Computacional) realizado pelo IComp/UFAM (de Freitas, Gadelha, 2017), para crianças e adolescentes, envolve atividades desplugadas, robótica e um circuito de etapas envolvendo problemas computacionais, em espaço aberto e material lúdico, como um jogo da Torre de Hanoi gigante, dados/placas em bits coloridos, corrida do saco etc.
+
+## 2. O circuito de atividades desplugadas proposto
+
+A investigação foi conduzida com base em uma metodologia de pesquisa aplicada, de caráter exploratório e com uma análise quali-quantitativa, buscando argumentos para reforçar a resposta à questão sobre a adequabilidade da realização de atividades lúdicas desplugadas, abordando problemas e jogos lógicos que incorporam conceitos computacionais, para desenvolver e refinar as habilidades relacionadas ao pensamento computacional e seus quatro pilares (Wing, 2017).
+
+A atividade desplugada foi planejada em cinco estações, cada uma delas explorando um momento diferente da vida de Ada Lovelace e relacionando, à cada fase da vida, um conceito ou um conjunto de conceitos computacionais (veja Tabela 1).
+
+Tabela 1: Quadro sobre as 05 estações do circuito de atividades desplugadas proposto.
+
+|Estação|Contexto / Motivação|Conceito Computacional|Material|Descrição e execução|
+|---|---|---|---|---|
+|Infância|Ada em sua infância, se distraia com diferentes tipos de desafios lógicos. Como seria se naquela época já existisse a Torre de Hanoi?|Recursividade, algoritmos enumerativos (força bruta)|i) Jogo da Torre de Hanoi. ii) Uma folha para anotar a quantidade de movimentos efetuados e o tempo gasto.|Resolver o problema do jogo da Torre de Hanoi com:i) 3 discos; ii) 4 discos; iii) 5 discos.|
+|Gata Puff|Ada tinha uma gata de estimação que foi sua grande companheira na infância. Como seria se a Gata Puff tivesse aprendido números binários?|Conversão de números binários para números decimais (e uso de criptogramas).|i) Uma folha explicativa sobre uma aventura da gata, propondo atividades de conversão de números binários.|i) Encontrar o num. decimal dada uma seq. de num. binários. ii) Unir várias sequências revelando a frase “Lute como uma garota”.|
+|Amizade|A amizade de Ada com Charles Babbage, que a explicou como a máquina analítica iria funcionar. Ada foi além e imaginou que a máquina poderia reproduzir imagens.|Representação de imagens|i) Uma folha com as regras para a representação da imagem em números e um exemplo. Atividade adaptada de (Bell_et al_, 2015)|i) Preencher a planilha e revelar a imagem.|
+|Família|A mãe de Ada não permitia nenhum contato com os poemas de_Lord_ Byron, seu pai. Mas como seria se Ada pudesse criptografá-los para lê-los em segredo?|Criptografia usando a Cifra de César|i) Trecho do poema Don Juan (_Lord Byron), texto original e criptografado. ii) Dispositivo com a cifra de Cesar|i) Decifrar a mensagem do poema com a chave dada.|
+|Materni- dade|Imagine que Ada estava promovendo uma festa para um dos filhos e precisou de ajuda na confecção de_cupcakes.|Pensamento Computacional (CT) e seus 4 pilares|i) Uma folha contendo um exemplo e uma lista de desafios com bolos (cupcakes) em diferentes estados.|i) Deixar todos os cupcakes_no estado “completo”, passando pelos 4 pilares do CT.|
+
+Conforme apresentado na Tabela 1, a primeira estação teve foco na Infância de Ada e teve como desafio o jogo da Torre de Hanoi. A segunda teve como personagem a Gata Puff, animal de estimação de Ada e propunha atividades com números binários. A terceira estação abordou o tema da Amizade por meio de uma atividade de representação de imagens. A quarta abordou o tema da Família de _Ada Lovelace e trabalhava o conceito de criptografia através de um exercício com um trecho de um poema de Lord Byron e a Cifra de César. E, por fim, a quinta estação explorou o cenário da Maternidade, remetendo a momentos da Ada com os filhos e propondo uma atividade de elaboração de algoritmos.
+
+Tal proposta foi aplicada em uma oficina de 4h de duração, com 10 estudantes entre 13-15 anos, 06 meninas e 04 meninos, de uma escola pública de referência do Estado de São Paulo, durante o X LAWCC – CLEI 2018.
+
+No início das atividades, 15 minutos foram dedicados para a recepção dos participantes. Posteriormente, cada um dos jovens recebeu uma cópia do livro (Bim, 2018) que orientou o trabalho, contextualizando o assunto. O livro foi lido em voz alta por uma das monitoras da Oficina, sendo acompanhado por todos. Em seguida, os participantes foram organizados por estação (cada estação tinha um(a) monitor(a)) e subdivididos por grupos em mesas, de formação espontânea de acordo com as afinidades prévias, sendo que cada participante escolheu a sua função na atividade. Cada mesa tinha aproximadamente 6 lugares. Uma das mesas ficou com apenas um aluno, homem, diagnosticado com transtorno do espectro autista (TEA). Portanto, os grupos de estudantes sentados nas mesas não obedeciam a critérios de idade, sexo ou classe, ocorrendo distribuição quase de forma aleatória. Por restrições de tempo, nem todos os grupos passaram por todas as estações de trabalho. No final da atividade, os alunos participaram do coffee break da conferência científica, mantendo contato com o público geral do evento, principalmente estudantes do ensino superior e professores universitários.
+
+### 3. Análise de gênero: comportamentos e desempenhos
+
+No geral, ao longo da realização das atividades nas estações, as equipes se mostraram engajadas na resolução dos problemas apresentados, conseguindo resolver os desafios no tempo proposto. Durante a execução das tarefas não se observaram comentários ou comportamentos de cunho sexista, ou mesmo “brincadeiras” que pudessem ser mal interpretadas, nem por parte dos jovens do sexo masculino, tampouco do feminino. De maneira geral, todos se mostraram desafiados e dispostos a participar do circuito proposto. Em diversos momentos, garotos e garotas interagiam para ajudar o grupo a resolver os problemas e realizar os cálculos. Predominantemente, os jovens tendiam a conversar e interagir mais com pessoas do mesmo sexo. No geral, todos os estudantes concluíram o desafio, alguns recebendo mais suporte do que outros.
+
+Nas equipes puramente femininas não se notou a prevalência de posições de liderança. As meninas discutiram e se empenharam na resolução dos problemas apresentados sem competitividade. Nas equipes puramente de meninos, notou-se uma pequena “disputa” e pressa na resolução das questões propostas. Em um caso específico, um garoto demorou mais tempo do que o restante do grupo e necessitou de ajuda especial dos coordenadores da atividade. No geral, as meninas foram ligeiramente mais rápidas na execução das atividades que os meninos. Um dos fatores que pode ter levado ao melhor desempenho feminino na atividade foi que, em média, a idade das meninas era superior à média das idades dos meninos.
+
+## 4. Conclusão
+
+A realização de atividades de computação desplugada tem se mostrado uma interessante estratégia para aproximar estudantes de métodos e técnicas da área da computação e desenvolver as habilidades do pensamento computacional de forma geral. Ainda, pela independência do uso de computadores e espaço com infraestrutura especial para a sua realização, tais atividades se mostram adequadas para realização em eventos e/ou escolas, sendo uma grande aliada em projetos de engajamento como os do Programa Meninas Digitais (Maciel, Bim, 2017). Também, permite que o tema de equidade de gênero seja trabalhado com meninas e meninos, possibilitando a análise de gênero frente a comportamentos, habilidades e desempenhos.
+
+O uso de um livro infantil (Bim, 2018) se mostrou adequado para a realização de atividades desplugadas pois trouxe a oportunidade de compartilhar a vida de uma das pioneiras da Computação além de oferecer um contexto para apresentar diversos conceitos computacionais. Embora o público alvo do livro seja diferente do público participante do circuito, o livro foi bem aceito. Após a leitura do texto vários participantes compartilharam suas impressões sobre a história e fizeram relação com suas próprias experiências, demonstrando o efeito de empatia que se pretendia alcançar com o livro.
+
+Agradecimentos: Os autores agradecem Kiara Cabral e Mateus Tristão pela elaboração do material da Estação Gata Puff.

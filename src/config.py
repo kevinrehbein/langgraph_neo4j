@@ -1,0 +1,9 @@
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+
+load_dotenv()
+llm = init_chat_model(model="gemini-3.5-flash-lite", model_provider="google_genai")
+# llm_backup1 = init_chat_model(model="llama-3.3-70b-versatile", model_provider="groq")
+# llm_backup2 = init_chat_model("openai/gpt-oss-120b", model_provider="groq")
+
+# llm = llm_principal.with_fallbacks([llm_backup1, llm_backup2])
