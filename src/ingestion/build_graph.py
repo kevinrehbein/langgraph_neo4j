@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from config import llm
+from config import llm  # noqa: E402
 
 transformer = LLMGraphTransformer(
     llm=llm,  # pyright: ignore[reportArgumentType]
@@ -60,8 +60,8 @@ graph = Neo4jGraph(
     password=os.getenv("NEO4J_PASSWORD"),
 )
 
-CHECKPOINT = ROOT / "src" / "ingestion" / "checkpoint_done.txt"
-FALHAS = ROOT / "src" / "ingestion" / "checkpoint_falhas.jsonl"
+CHECKPOINT = ROOT / "ingestion" / "checkpoint_done.txt"
+FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
 MAX_FALHAS_SEGUIDAS = 5
 ERROS = (ConnectionError, TimeoutError)
 
