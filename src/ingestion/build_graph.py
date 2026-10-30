@@ -149,27 +149,27 @@ async def main():
                 return_exceptions=True,  # um erro não derruba os outros
             )
 
-        for (cid, doc), graph_docs in zip(lote, resultados):
-            try:
-                if isinstance(graph_docs, Exception):
-                    raise graph_docs
+            for (cid, doc), graph_docs in zip(lote, resultados):
+                try:
+                    if isinstance(graph_docs, Exception):
+                        raise graph_docs
 
-                print(graph_docs)
+                    print(graph_docs)
 
-                if graph_docs:
-                    graph.add_graph_documents(
-                        graph_docs, baseEntityLabel=False, include_source=True
+                    if graph_docs:
+                        graph.add_graph_documents(
+                            graph_docs, baseEntityLabel=False, include_source=True
+                        )
+                        add_metadata(doc)
+
+                    anexar_linha(CHECKPOINT, cid)  # só marca depois de gravar
+
+                except Exception as e:  # noqa: BLE001
+                    anexar_linha(
+                        FALHAS,
+                        json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False),
                     )
-                    add_metadata(doc)
-
-                anexar_linha(CHECKPOINT, cid)  # só marca depois de gravar
-
-            except Exception as e:  # noqa: BLE001
-                anexar_linha(
-                    FALHAS,
-                    json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False),
-                )
-                print(f"Falha no chunk {cid}: {e}", flush=True)
+                    print(f"Falha no chunk {cid}: {e}", flush=True)
 
     except KeyboardInterrupt:
         print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
@@ -182,7 +182,7 @@ pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
 print(f"Total: {len(chunks)} | pendentes: {len(pendentes)}")
 
 try:
-    asyncio.run(main())  # no Kaggle/Jupyter: await main()
+    asyncio.run(main())
 except KeyboardInterrupt:
     print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
 
