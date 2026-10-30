@@ -130,6 +130,7 @@ def carregar_feitos() -> set[str]:
 def marcar_feito(cid: str) -> None:
     graph.query("MERGE (:Checkpoint {id: $id})", {"id": cid})
 
+
 def anexar_linha(path: Path, linha: str) -> None:
     with path.open("a", encoding="utf-8") as f:
         f.write(linha + "\n")
@@ -144,7 +145,9 @@ def anexar_linha(path: Path, linha: str) -> None:
 async def extrair_grafo(lote):
     return await transformer.aconvert_to_graph_documents(lote)
 
+
 CONCORRENCIA = 16
+
 
 async def main():
     try:
@@ -164,7 +167,7 @@ async def main():
 
                     print(graph_docs)
 
-                    if not graph_docs:                      # 2º: veio vazio?
+                    if not graph_docs:  # 2º: veio vazio?
                         raise ValueError("extração retornou vazio")
 
                     graph.add_graph_documents(
@@ -183,8 +186,9 @@ async def main():
     except KeyboardInterrupt:
         print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
 
+
 random.seed(13)
-chunks = random.sample(chunks, 5)  # Teste com 5 aleatorios
+chunks = random.sample(chunks, 20)  # Teste com 5 aleatorios
 
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
