@@ -146,7 +146,7 @@ async def extrair_grafo(lote):
     return await transformer.aconvert_to_graph_documents(lote)
 
 
-CONCORRENCIA = 16
+CONCORRENCIA = 8
 
 
 async def main():
@@ -188,7 +188,7 @@ async def main():
 
 
 random.seed(13)
-chunks = random.sample(chunks, 20)  # Teste com 5 aleatorios
+chunks = random.sample(chunks, 30)  # Teste com 5 aleatorios
 
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
