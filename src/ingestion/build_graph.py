@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import random
@@ -43,7 +44,7 @@ transformer = LLMGraphTransformer(
         "ABORDA",
         "PRODUZ",
         "PERTENCE_A",
-        "BENEFICIA",
+        "IMPACTA",
     ],
     strict_mode=True,
     node_properties=["descricao"],
@@ -64,7 +65,7 @@ transformer = LLMGraphTransformer(
         "Projeto, Acao ou Ferramenta ABORDA Conceito; "
         "Acao ou Ferramenta PRODUZ Resultado; "
         "Projeto ou Conceito PERTENCE_A Area; "
-        "Resultado BENEFICIA Publico."
+        "Resultado IMPACTA Publico."
     ),
     ignore_tool_usage=False,
 )
@@ -128,43 +129,60 @@ def anexar_linha(path: Path, linha: str) -> None:
 
 @retry(
     retry=retry_if_exception_type(Exception),
-    wait=wait_exponential_jitter(initial=1, max=10),
+    wait=wait_exponential_jitter(initial=1, max=3),
     stop=stop_after_attempt(3),
     reraise=True,
 )
-def extrair_grafo(lote):
-    return transformer.convert_to_graph_documents(lote)
+async def extrair_grafo(lote):
+    return await transformer.aconvert_to_graph_documents(lote)
 
+CONCORRENCIA = 4
+
+async def main():
+    try:
+        for i in range(0, len(pendentes), CONCORRENCIA):
+            lote = pendentes[i : i + CONCORRENCIA]
+
+            # extrai o lote inteiro em paralelo
+            resultados = await asyncio.gather(
+                *(extrair_grafo([doc]) for _, doc in lote),
+                return_exceptions=True,  # um erro não derruba os outros
+            )
+
+        for (cid, doc), graph_docs in zip(lote, resultados):
+            try:
+                if isinstance(graph_docs, Exception):
+                    raise graph_docs
+
+                print(graph_docs)
+
+                if graph_docs:
+                    graph.add_graph_documents(
+                        graph_docs, baseEntityLabel=False, include_source=True
+                    )
+                    add_metadata(doc)
+
+                anexar_linha(CHECKPOINT, cid)  # só marca depois de gravar
+
+            except Exception as e:  # noqa: BLE001
+                anexar_linha(
+                    FALHAS,
+                    json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False),
+                )
+                print(f"Falha no chunk {cid}: {e}", flush=True)
+
+    except KeyboardInterrupt:
+        print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
 
 random.seed(13)
 chunks = random.sample(chunks, 5)  # Teste com 5 aleatorios
 
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
-print(f"Total: {len(chunks)} | já feitos: {len(feitos)} | pendentes: {len(pendentes)}")
-
+print(f"Total: {len(chunks)} | pendentes: {len(pendentes)}")
 
 try:
-    for n, (cid, doc) in enumerate(pendentes, start=1):
-        try:
-            graph_docs = extrair_grafo([doc])
-            print(graph_docs)
-
-            if graph_docs:
-                graph.add_graph_documents(
-                    graph_docs, baseEntityLabel=False, include_source=True
-                )
-                add_metadata(doc)
-
-            anexar_linha(CHECKPOINT, cid)  # só marca depois de gravar
-
-        except Exception as e:  # noqa: BLE001
-            anexar_linha(
-                FALHAS,
-                json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False),
-            )
-            print(f"Falha no chunk {n}: {e}", flush=True)
-
+    asyncio.run(main())  # no Kaggle/Jupyter: await main()
 except KeyboardInterrupt:
     print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
 
