@@ -116,11 +116,19 @@ def chunk_id(chunk) -> str:
     return chunk.metadata["id"]
 
 
-def carregar_feitos() -> set[str]:
-    if CHECKPOINT.exists():
-        return set(CHECKPOINT.read_text().split())
-    return set()
+graph.query(
+    "CREATE CONSTRAINT checkpoint_id IF NOT EXISTS "
+    "FOR (c:Checkpoint) REQUIRE c.id IS UNIQUE"
+)
 
+
+def carregar_feitos() -> set[str]:
+    rows = graph.query("MATCH (c:Checkpoint) RETURN c.id AS id")
+    return {r["id"] for r in rows}
+
+
+def marcar_feito(cid: str) -> None:
+    graph.query("MERGE (:Checkpoint {id: $id})", {"id": cid})
 
 def anexar_linha(path: Path, linha: str) -> None:
     with path.open("a", encoding="utf-8") as f:
@@ -136,7 +144,7 @@ def anexar_linha(path: Path, linha: str) -> None:
 async def extrair_grafo(lote):
     return await transformer.aconvert_to_graph_documents(lote)
 
-CONCORRENCIA = 4
+CONCORRENCIA = 16
 
 async def main():
     try:
@@ -156,13 +164,14 @@ async def main():
 
                     print(graph_docs)
 
-                    if graph_docs:
-                        graph.add_graph_documents(
-                            graph_docs, baseEntityLabel=False, include_source=True
-                        )
-                        add_metadata(doc)
+                    if not graph_docs:                      # 2º: veio vazio?
+                        raise ValueError("extração retornou vazio")
 
-                    anexar_linha(CHECKPOINT, cid)  # só marca depois de gravar
+                    graph.add_graph_documents(
+                        graph_docs, baseEntityLabel=False, include_source=True
+                    )
+                    add_metadata(doc)
+                    marcar_feito(cid)  # só marca depois de gravar no grafo
 
                 except Exception as e:  # noqa: BLE001
                     anexar_linha(
@@ -179,7 +188,7 @@ chunks = random.sample(chunks, 5)  # Teste com 5 aleatorios
 
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
-print(f"Total: {len(chunks)} | pendentes: {len(pendentes)}")
+print(f"Total: {len(chunks)} | Feitos: {len(feitos)} | Pendentes: {len(pendentes)}")
 
 try:
     asyncio.run(main())
