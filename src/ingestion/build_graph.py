@@ -15,7 +15,11 @@ from tenacity import (
     wait_exponential_jitter,
 )
 
+CONCORRENCIA = 4
+
 ROOT = Path(__file__).resolve().parents[1]
+CHECKPOINT = ROOT / "ingestion" / "checkpoint_done.txt"
+FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
 
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
@@ -79,9 +83,6 @@ graph = Neo4jGraph(
     password=os.getenv("NEO4J_PASSWORD"),
 )
 
-CHECKPOINT = ROOT / "ingestion" / "checkpoint_done.txt"
-FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
-
 
 def add_metadata(doc):
     m = doc.metadata
@@ -144,9 +145,6 @@ def anexar_linha(path: Path, linha: str) -> None:
 )
 async def extrair_grafo(lote):
     return await transformer.aconvert_to_graph_documents(lote)
-
-
-CONCORRENCIA = 8
 
 
 async def main():
