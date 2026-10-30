@@ -30,8 +30,9 @@ for _, filepath in enumerate(sorted(MARKDOWNS_PATH.rglob("*.md"))):
 
     for i, c in enumerate(char_splitter.split_documents(secoes)):
         c.metadata.update(artigo_metadados)
+        c.metadata["artigo_id"] = c.metadata.pop("id", id_artigo)
         raw_id = f"{id_artigo}_{i}"
-        c.metadata["chunk_id"] = hashlib.md5(raw_id.encode("utf-8")).hexdigest()
+        c.metadata["id"] = hashlib.md5(raw_id.encode("utf-8")).hexdigest()
         chunks.append(c)
 
 print(f"Total de chunks gerados: {len(chunks)}")

@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -18,39 +19,56 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from config import llm  # noqa: E402
+from config import llm_graph_transformer  # noqa: E402
 
 transformer = LLMGraphTransformer(
-    llm=llm,  # pyright: ignore[reportArgumentType]
+    llm=llm_graph_transformer,  # pyright: ignore[reportArgumentType]
     allowed_nodes=[
-        "Iniciativa",
+        "Projeto",
         "Acao",
         "Ferramenta",
         "Publico",
         "Conceito",
+        "Area",
         "Resultado",
-        "Organizacao",
+        "Instituicao",
         "Local",
     ],
     allowed_relationships=[
-        ("Iniciativa", "REALIZA", "Acao"),
-        ("Iniciativa", "DESENVOLVE", "Ferramenta"),
-        ("Iniciativa", "VINCULADA_A", "Iniciativa"),
-        ("Iniciativa", "SEDIADA_EM", "Organizacao"),
-        ("Organizacao", "LOCALIZADA_EM", "Local"),
-        ("Acao", "OCORRE_EM", "Local"),
-        ("Local", "DENTRO_DE", "Local"),
-        ("Acao", "DIRIGIDA_A", "Publico"),
-        ("Ferramenta", "DIRIGIDA_A", "Publico"),
-        ("Iniciativa", "ABORDA", "Conceito"),
-        ("Acao", "ABORDA", "Conceito"),
-        ("Ferramenta", "ABORDA", "Conceito"),
-        ("Acao", "PRODUZ", "Resultado"),
-        ("Ferramenta", "PRODUZ", "Resultado"),
+        "REALIZA",
+        "DESENVOLVE",
+        "VINCULADO_A",
+        "LOCALIZADO_EM",
+        "DIRIGIDA_A",
+        "ABORDA",
+        "PRODUZ",
+        "PERTENCE_A",
+        "BENEFICIA",
     ],
-    node_properties=["descricao"],
     strict_mode=True,
+    node_properties=["descricao"],
+    additional_instructions=(
+        "Escreva em português. Use nomes consistentes para as entidades. "
+        "OBRIGATÓRIO: preencha a propriedade descricao em TODO nó, com 1 frase "
+        "baseada no texto. "
+        "Use apenas os tipos de nó e de relação permitidos, exatamente "
+        "como escritos, sem acentos. "
+        "Respeite a direção e os tipos de cada relação: "
+        "Projeto REALIZA Acao; "
+        "Projeto DESENVOLVE Ferramenta; "
+        "Projeto VINCULADO_A Projeto (projetos relacionados entre si); "
+        "Projeto VINCULADO_A Instituicao; "
+        "Instituicao, Acao, Projeto ou Local LOCALIZADO_EM Local "
+        "(use sempre para dizer onde algo fica ou acontece); "
+        "Acao ou Ferramenta DIRIGIDA_A Publico; "
+        "Projeto, Acao ou Ferramenta ABORDA Conceito; "
+        "Acao ou Ferramenta PRODUZ Resultado; "
+        "Projeto ou Conceito PERTENCE_A Area; "
+        "Resultado BENEFICIA Publico."
+    ),
+    ignore_tool_usage=False,
 )
+
 
 load_dotenv()
 
@@ -62,12 +80,39 @@ graph = Neo4jGraph(
 
 CHECKPOINT = ROOT / "ingestion" / "checkpoint_done.txt"
 FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
-MAX_FALHAS_SEGUIDAS = 5
-ERROS = (ConnectionError, TimeoutError)
+
+
+def add_metadata(doc):
+    m = doc.metadata
+    graph.query(
+        """
+        MERGE (a:Artigo {id: $artigo_id})
+        SET a.titulo = $titulo, a.url_artigo = $url_artigo, a.url_pdf = $url_pdf
+        WITH a
+        MATCH (d:Document {id: $chunk_id})
+        MERGE (d)-[:PARTE_DE]->(a)
+        WITH a
+        MERGE (e:Edicao {nome: $edicao})
+        MERGE (a)-[:PUBLICADO_EM]->(e)
+        WITH a
+        UNWIND $autores AS nome
+        MERGE (au:Autor {nome: nome})
+        MERGE (a)-[:ESCRITO_POR]->(au)
+        """,
+        {
+            "artigo_id": m["artigo_id"],
+            "titulo": m["titulo"],
+            "url_artigo": m["url_artigo"],
+            "url_pdf": m["url_pdf"],
+            "chunk_id": m["id"],
+            "edicao": m["edicao"].replace("\xa0", " ").strip(),
+            "autores": [a.strip() for a in m["autores"].split(",")],
+        },
+    )
 
 
 def chunk_id(chunk) -> str:
-    return chunk.metadata["chunk_id"]
+    return chunk.metadata["id"]
 
 
 def carregar_feitos() -> set[str]:
@@ -82,49 +127,43 @@ def anexar_linha(path: Path, linha: str) -> None:
 
 
 @retry(
-    retry=retry_if_exception_type(ERROS),
-    wait=wait_exponential_jitter(initial=5, max=60),
-    stop=stop_after_attempt(5),
+    retry=retry_if_exception_type(Exception),
+    wait=wait_exponential_jitter(initial=1, max=10),
+    stop=stop_after_attempt(3),
     reraise=True,
 )
 def extrair_grafo(lote):
     return transformer.convert_to_graph_documents(lote)
 
 
-chunks = chunks[:5]  # Teste com 5
+random.seed(13)
+chunks = random.sample(chunks, 5)  # Teste com 5 aleatorios
+
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
 print(f"Total: {len(chunks)} | já feitos: {len(feitos)} | pendentes: {len(pendentes)}")
 
-falhas_seguidas = 0
 
 try:
     for n, (cid, doc) in enumerate(pendentes, start=1):
         try:
             graph_docs = extrair_grafo([doc])
+            print(graph_docs)
 
             if graph_docs:
                 graph.add_graph_documents(
-                    graph_docs, baseEntityLabel=True, include_source=True
+                    graph_docs, baseEntityLabel=False, include_source=True
                 )
+                add_metadata(doc)
 
             anexar_linha(CHECKPOINT, cid)  # só marca depois de gravar
-            falhas_seguidas = 0
 
         except Exception as e:  # noqa: BLE001
-            falhas_seguidas += 1
             anexar_linha(
                 FALHAS,
                 json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False),
             )
             print(f"Falha no chunk {n}: {e}", flush=True)
-
-            if falhas_seguidas >= MAX_FALHAS_SEGUIDAS:
-                print(
-                    f"{MAX_FALHAS_SEGUIDAS} falhas seguidas. "
-                    "Verifique Ollama/Neo4j e rode de novo."
-                )
-                break
 
 except KeyboardInterrupt:
     print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
