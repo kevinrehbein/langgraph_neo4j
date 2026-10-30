@@ -37,9 +37,9 @@ def get_soup(url: str) -> BeautifulSoup:
     return BeautifulSoup(resposta.text, "html.parser")
 
 
-def slug(txt: str | None, n: int = 150) -> str:
+def slug(txt: str | None) -> str:
     txt = "" if txt is None else txt
-    return re.sub(r"[^\w\-]+", "_", txt).strip("_")[:150]
+    return re.sub(r"[^\w\-]+", "_", txt).strip("_")
 
 
 def run() -> None:
