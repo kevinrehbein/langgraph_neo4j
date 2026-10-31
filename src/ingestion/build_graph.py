@@ -15,7 +15,7 @@ from tenacity import (
     wait_exponential_jitter,
 )
 
-CONCORRENCIA = 4
+CONCORRENCIA = 8 # 4 por GPU
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKPOINT = ROOT / "ingestion" / "checkpoint_done.txt"
@@ -24,56 +24,63 @@ FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-from config import llm_graph_transformer  # noqa: E402
+from config import llm_graph_transformer_0, llm_graph_transformer_1
 
-transformer = LLMGraphTransformer(
-    llm=llm_graph_transformer,  # pyright: ignore[reportArgumentType]
-    allowed_nodes=[
-        "Projeto",
-        "Acao",
-        "Ferramenta",
-        "Publico",
-        "Conceito",
-        "Area",
-        "Resultado",
-        "Instituicao",
-        "Local",
-    ],
-    allowed_relationships=[
-        "REALIZA",
-        "DESENVOLVE",
-        "VINCULADO_A",
-        "LOCALIZADO_EM",
-        "DIRIGIDA_A",
-        "ABORDA",
-        "PRODUZ",
-        "PERTENCE_A",
-        "IMPACTA",
-    ],
-    strict_mode=True,
-    node_properties=["descricao"],
-    additional_instructions=(
-        "Escreva em português. Use nomes consistentes para as entidades. "
-        "OBRIGATÓRIO: preencha a propriedade descricao em TODO nó, com 1 frase "
-        "baseada no texto. "
-        "Use apenas os tipos de nó e de relação permitidos, exatamente "
-        "como escritos, sem acentos. "
-        "Respeite a direção e os tipos de cada relação: "
-        "Projeto REALIZA Acao; "
-        "Projeto DESENVOLVE Ferramenta; "
-        "Projeto VINCULADO_A Projeto (projetos relacionados entre si); "
-        "Projeto VINCULADO_A Instituicao; "
-        "Instituicao, Acao, Projeto ou Local LOCALIZADO_EM Local "
-        "(use sempre para dizer onde algo fica ou acontece); "
-        "Acao ou Ferramenta DIRIGIDA_A Publico; "
-        "Projeto, Acao ou Ferramenta ABORDA Conceito; "
-        "Acao ou Ferramenta PRODUZ Resultado; "
-        "Projeto ou Conceito PERTENCE_A Area; "
-        "Resultado IMPACTA Publico."
-    ),
-    ignore_tool_usage=False,
-)
 
+def make_LLMGraphTransformer(llm):
+    return LLMGraphTransformer(
+        llm=llm,
+        allowed_nodes=[
+            "Projeto",
+            "Acao",
+            "Ferramenta",
+            "Publico",
+            "Conceito",
+            "Area",
+            "Resultado",
+            "Instituicao",
+            "Local",
+        ],
+        allowed_relationships=[
+            "REALIZA",
+            "DESENVOLVE",
+            "VINCULADO_A",
+            "LOCALIZADO_EM",
+            "DIRIGIDA_A",
+            "ABORDA",
+            "PRODUZ",
+            "PERTENCE_A",
+            "IMPACTA",
+        ],
+        strict_mode=True,
+        node_properties=["descricao"],
+        additional_instructions=(
+            "Escreva em português. Use nomes consistentes para as entidades. "
+            "OBRIGATÓRIO: preencha a propriedade descricao em TODO nó, com 1 frase "
+            "baseada no texto. "
+            "Use apenas os tipos de nó e de relação permitidos, exatamente "
+            "como escritos, sem acentos. "
+            "Respeite a direção e os tipos de cada relação: "
+            "Projeto REALIZA Acao; "
+            "Projeto DESENVOLVE Ferramenta; "
+            "Projeto VINCULADO_A Projeto (projetos relacionados entre si); "
+            "Projeto VINCULADO_A Instituicao; "
+            "Instituicao, Acao, Projeto ou Local LOCALIZADO_EM Local "
+            "(use sempre para dizer onde algo fica ou acontece); "
+            "Acao ou Ferramenta DIRIGIDA_A Publico; "
+            "Projeto, Acao ou Ferramenta ABORDA Conceito; "
+            "Acao ou Ferramenta PRODUZ Resultado; "
+            "Projeto ou Conceito PERTENCE_A Area; "
+            "Resultado IMPACTA Publico."
+        ),
+        ignore_tool_usage=False,
+    )
+
+
+LLMGraphtransformers = [
+    make_LLMGraphTransformer(llm_graph_transformer_0),
+    make_LLMGraphTransformer(llm_graph_transformer_1),
+]
 
 load_dotenv()
 
@@ -143,7 +150,7 @@ def anexar_linha(path: Path, linha: str) -> None:
     stop=stop_after_attempt(3),
     reraise=True,
 )
-async def extrair_grafo(lote):
+async def extrair_grafo(lote, transformer):
     return await transformer.aconvert_to_graph_documents(lote)
 
 
@@ -154,7 +161,10 @@ async def main():
 
             # extrai o lote inteiro em paralelo
             resultados = await asyncio.gather(
-                *(extrair_grafo([doc]) for _, doc in lote),
+                *(
+                    extrair_grafo([doc], LLMGraphtransformers[i % 2])
+                    for i, (_, doc) in enumerate(lote)
+                ),
                 return_exceptions=True,  # um erro não derruba os outros
             )
 
