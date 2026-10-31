@@ -1,7 +1,6 @@
 import asyncio
 import json
 import os
-import random
 import sys
 from pathlib import Path
 
@@ -189,9 +188,6 @@ async def main():
         *(processar(i, cid, doc) for i, (cid, doc) in enumerate(pendentes))
     )
 
-
-random.seed(13)
-chunks = random.sample(chunks, 30)  # Teste com 30
 
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
