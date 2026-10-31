@@ -15,7 +15,7 @@ from tenacity import (
     wait_exponential_jitter,
 )
 
-CONCORRENCIA_POR_GPU = 4
+CONCORRENCIA_POR_GPU = 6
 
 ROOT = Path(__file__).resolve().parents[1]
 FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
@@ -157,12 +157,12 @@ async def extrair_grafo(lote, transformer):
         transformer.aconvert_to_graph_documents(lote), timeout=420
     )
 
+
 def gravar(graph_docs, doc, cid):
-    graph.add_graph_documents(
-        graph_docs, baseEntityLabel=True, include_source=True
-    )
+    graph.add_graph_documents(graph_docs, baseEntityLabel=True, include_source=True)
     add_metadata(doc)
     marcar_feito(cid)
+
 
 async def processar(i, cid, doc):
     k = i % len(LLMGraphTransformers)  # GPU deste chunk
@@ -183,13 +183,15 @@ async def processar(i, cid, doc):
         )
         print(f"Falha no chunk {cid}: {e}", flush=True)
 
+
 async def main():
     await asyncio.gather(
         *(processar(i, cid, doc) for i, (cid, doc) in enumerate(pendentes))
     )
 
+
 random.seed(13)
-chunks = random.sample(chunks, 30)  # Teste com 5 aleatorios
+chunks = random.sample(chunks, 30)  # Teste com 30
 
 feitos = carregar_feitos()
 pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
