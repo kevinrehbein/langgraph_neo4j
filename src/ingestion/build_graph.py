@@ -15,10 +15,9 @@ from tenacity import (
     wait_exponential_jitter,
 )
 
-CONCORRENCIA = 8 # 4 por GPU
+CONCORRENCIA_POR_GPU = 4
 
 ROOT = Path(__file__).resolve().parents[1]
-CHECKPOINT = ROOT / "ingestion" / "checkpoint_done.txt"
 FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
 
 if str(ROOT) not in sys.path:
@@ -77,10 +76,13 @@ def make_LLMGraphTransformer(llm):
     )
 
 
-LLMGraphtransformers = [
+LLMGraphTransformers = [
     make_LLMGraphTransformer(llm_graph_transformer_0),
     make_LLMGraphTransformer(llm_graph_transformer_1),
 ]
+
+sems = [asyncio.Semaphore(CONCORRENCIA_POR_GPU) for _ in LLMGraphTransformers]
+db_lock = asyncio.Lock()
 
 load_dotenv()
 
@@ -151,49 +153,40 @@ def anexar_linha(path: Path, linha: str) -> None:
     reraise=True,
 )
 async def extrair_grafo(lote, transformer):
-    return await transformer.aconvert_to_graph_documents(lote)
+    return await asyncio.wait_for(
+        transformer.aconvert_to_graph_documents(lote), timeout=420
+    )
 
+def gravar(graph_docs, doc, cid):
+    graph.add_graph_documents(
+        graph_docs, baseEntityLabel=True, include_source=True
+    )
+    add_metadata(doc)
+    marcar_feito(cid)
+
+async def processar(i, cid, doc):
+    k = i % len(LLMGraphTransformers)  # GPU deste chunk
+    try:
+        async with sems[k]:
+            graph_docs = await extrair_grafo([doc], LLMGraphTransformers[k])
+        # semáforo liberado
+
+        if not graph_docs or not graph_docs[0].nodes:
+            raise ValueError("extração retornou vazio")
+
+        async with db_lock:  # um write por vez no Neo4j
+            await asyncio.to_thread(gravar, graph_docs, doc, cid)
+
+    except Exception as e:  # noqa: BLE001
+        anexar_linha(
+            FALHAS, json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False)
+        )
+        print(f"Falha no chunk {cid}: {e}", flush=True)
 
 async def main():
-    try:
-        for i in range(0, len(pendentes), CONCORRENCIA):
-            lote = pendentes[i : i + CONCORRENCIA]
-
-            # extrai o lote inteiro em paralelo
-            resultados = await asyncio.gather(
-                *(
-                    extrair_grafo([doc], LLMGraphtransformers[i % 2])
-                    for i, (_, doc) in enumerate(lote)
-                ),
-                return_exceptions=True,  # um erro não derruba os outros
-            )
-
-            for (cid, doc), graph_docs in zip(lote, resultados):
-                try:
-                    if isinstance(graph_docs, Exception):
-                        raise graph_docs
-
-                    print(graph_docs)
-
-                    if not graph_docs:  # 2º: veio vazio?
-                        raise ValueError("extração retornou vazio")
-
-                    graph.add_graph_documents(
-                        graph_docs, baseEntityLabel=False, include_source=True
-                    )
-                    add_metadata(doc)
-                    marcar_feito(cid)  # só marca depois de gravar no grafo
-
-                except Exception as e:  # noqa: BLE001
-                    anexar_linha(
-                        FALHAS,
-                        json.dumps({"id": cid, "erro": str(e)}, ensure_ascii=False),
-                    )
-                    print(f"Falha no chunk {cid}: {e}", flush=True)
-
-    except KeyboardInterrupt:
-        print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
-
+    await asyncio.gather(
+        *(processar(i, cid, doc) for i, (cid, doc) in enumerate(pendentes))
+    )
 
 random.seed(13)
 chunks = random.sample(chunks, 30)  # Teste com 5 aleatorios
@@ -205,6 +198,6 @@ print(f"Total: {len(chunks)} | Feitos: {len(feitos)} | Pendentes: {len(pendentes
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
-    print("\nInterrompido. O progresso está salvo; rode de novo para retomar.")
+    print("\nInterrompido. O progresso está salvo, rode de novo para retomar.")
 
 print("Fim da execução.")
