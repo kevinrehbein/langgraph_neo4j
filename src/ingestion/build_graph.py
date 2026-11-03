@@ -1,12 +1,12 @@
 import asyncio
 import json
 import os
-import sys
 from pathlib import Path
 
 from chunking import chunks
 from dotenv import load_dotenv
 from langchain_neo4j import LLMGraphTransformer, Neo4jGraph
+from langchain_ollama import ChatOllama
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -19,10 +19,32 @@ CONCORRENCIA_POR_GPU = 6
 ROOT = Path(__file__).resolve().parents[1]
 FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
 
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))
+load_dotenv()
 
-from config import llm_graph_transformer_0, llm_graph_transformer_1
+# Modelos utilizados para extrair entidades via Ollama rodando no Kaggle 2xT4
+llm_graph_transformer_0 = ChatOllama(
+    model="qwen3:8b",
+    reasoning=False,
+    temperature=0,
+    num_ctx=8192,
+    num_predict=4096,
+    base_url="http://127.0.0.1:11434",
+)
+llm_graph_transformer_1 = ChatOllama(
+    model="qwen3:8b",
+    reasoning=False,
+    temperature=0,
+    num_ctx=8192,
+    num_predict=4096,
+    base_url="http://127.0.0.1:11435",
+)
+
+# Grafo Neo4j hospedado no AuraDB
+graph = Neo4jGraph(
+    url=os.getenv("NEO4J_URI"),
+    username=os.getenv("NEO4J_USERNAME"),
+    password=os.getenv("NEO4J_PASSWORD"),
+)
 
 
 def make_LLMGraphTransformer(llm):
@@ -82,14 +104,6 @@ LLMGraphTransformers = [
 
 sems = [asyncio.Semaphore(CONCORRENCIA_POR_GPU) for _ in LLMGraphTransformers]
 db_lock = asyncio.Lock()
-
-load_dotenv()
-
-graph = Neo4jGraph(
-    url=os.getenv("NEO4J_URI"),
-    username=os.getenv("NEO4J_USERNAME"),
-    password=os.getenv("NEO4J_PASSWORD"),
-)
 
 
 def add_metadata(doc):

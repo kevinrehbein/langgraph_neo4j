@@ -1,5 +1,8 @@
 from dotenv import load_dotenv
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import ChatOllama
+from langchain_neo4j import Neo4jGraph
+import os
 
 load_dotenv()
 """
@@ -9,14 +12,7 @@ llm = init_chat_model(
 )
 """
 
-llm_graph_transformer_0 = ChatOllama(
-    model="qwen3:8b", reasoning=False, temperature=0, num_ctx=8192, num_predict=4096,
-    base_url="http://127.0.0.1:11434",
-)
-llm_graph_transformer_1 = ChatOllama(
-    model="qwen3:8b", reasoning=False, temperature=0, num_ctx=8192, num_predict=4096,
-    base_url="http://127.0.0.1:11435",
-)
+
 # llm_backup1 = init_chat_model(model="llama-3.3-70b-versatile", model_provider="groq")
 # llm_backup2 = init_chat_model("openai/gpt-oss-120b", model_provider="groq")
 
