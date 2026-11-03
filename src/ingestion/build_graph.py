@@ -136,6 +136,22 @@ def carregar_feitos() -> set[str]:
     return {r["id"] for r in rows}
 
 
+def carregar_falhas() -> set[str]:
+    if not FALHAS.exists():
+        return set()
+    ids = set()
+    with FALHAS.open(encoding="utf-8") as f:
+        for linha in f:
+            linha = linha.strip()
+            if not linha:
+                continue
+            try:
+                ids.add(json.loads(linha)["id"])
+            except json.JSONDecodeError, KeyError:
+                continue  # ignora linhas corrompidas
+    return ids
+
+
 def marcar_feito(cid: str) -> None:
     graph.query("MERGE (:Checkpoint {id: $id})", {"id": cid})
 
@@ -190,8 +206,16 @@ async def main():
 
 
 feitos = carregar_feitos()
-pendentes = [(chunk_id(c), c) for c in chunks if chunk_id(c) not in feitos]
-print(f"Total: {len(chunks)} | Feitos: {len(feitos)} | Pendentes: {len(pendentes)}")
+falhos = carregar_falhas()
+pendentes = [
+    (chunk_id(c), c)
+    for c in chunks
+    if chunk_id(c) not in feitos and chunk_id(c) not in falhos
+]
+print(
+    f"Total: {len(chunks)} | Feitos: {len(feitos)} | "
+    f"Falhos (ignorados): {len(falhos)} | Pendentes: {len(pendentes)}"
+)
 
 try:
     asyncio.run(main())
