@@ -162,10 +162,6 @@ def carregar(path: Path) -> set[str]:
     return ids
 
 
-def marcar_feito(cid: str) -> None:
-    graph.query("MERGE (:Checkpoint {id: $id})", {"id": cid})
-
-
 def anexar_linha(path: Path, linha: str) -> None:
     with path.open("a", encoding="utf-8") as f:
         f.write(linha + "\n")
@@ -186,7 +182,6 @@ async def extrair_grafo(lote, transformer):
 def gravar(graph_docs, doc, cid):
     graph.add_graph_documents(graph_docs, baseEntityLabel=True, include_source=True)
     add_metadata(doc)
-    marcar_feito(cid)
     anexar_linha(FEITOS, json.dumps({"id": cid}, ensure_ascii=False))
 
 
