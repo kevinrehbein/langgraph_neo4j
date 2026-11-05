@@ -18,6 +18,7 @@ CONCORRENCIA_POR_GPU = 6
 
 ROOT = Path(__file__).resolve().parents[1]
 FALHAS = ROOT / "ingestion" / "checkpoint_falhas.jsonl"
+FEITOS = ROOT / "ingestion" / "checkpoint_feitos.jsonl"
 
 load_dotenv()
 
@@ -145,16 +146,11 @@ graph.query(
 )
 
 
-def carregar_feitos() -> set[str]:
-    rows = graph.query("MATCH (c:Checkpoint) RETURN c.id AS id")
-    return {r["id"] for r in rows}
-
-
-def carregar_falhas() -> set[str]:
-    if not FALHAS.exists():
+def carregar(path: Path) -> set[str]:
+    if not path.exists():
         return set()
     ids = set()
-    with FALHAS.open(encoding="utf-8") as f:
+    with path.open(encoding="utf-8") as f:
         for linha in f:
             linha = linha.strip()
             if not linha:
@@ -191,6 +187,7 @@ def gravar(graph_docs, doc, cid):
     graph.add_graph_documents(graph_docs, baseEntityLabel=True, include_source=True)
     add_metadata(doc)
     marcar_feito(cid)
+    anexar_linha(FEITOS, json.dumps({"id": cid}, ensure_ascii=False))
 
 
 async def processar(i, cid, doc):
@@ -219,8 +216,8 @@ async def main():
     )
 
 
-feitos = carregar_feitos()
-falhos = carregar_falhas()
+feitos = carregar(FEITOS)
+falhos = carregar(FALHAS)
 pendentes = [
     (chunk_id(c), c)
     for c in chunks

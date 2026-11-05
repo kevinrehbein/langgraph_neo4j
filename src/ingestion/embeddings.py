@@ -10,7 +10,7 @@ LOTE = 64
 load_dotenv()
 
 # Modelo para indexação dos embeddings dos nós do grafo
-# Dentro do seu processo Python (PyTorch)
+# (PyTorch)
 embeddings_model = HuggingFaceEmbeddings(
     model_name="BAAI/bge-m3",
     model_kwargs={"device": "cuda"},
@@ -42,14 +42,14 @@ def criar_indices():
         )
 
 
-def embedar(label, text_expr):
+def criar_embedding(label, text):
     total = 0
     while True:
         rows = graph.query(
             f"""
             MATCH (n:`{label}`)
             WHERE n.embedding IS NULL
-            WITH n, {text_expr} AS texto
+            WITH n, {text} AS texto
             WHERE texto IS NOT NULL AND texto <> ''
             RETURN elementId(n) AS eid, texto
             LIMIT $n
@@ -77,10 +77,10 @@ if __name__ == "__main__":
     criar_indices()
 
     # chunks
-    embedar("Document", "n.text")
+    criar_embedding("Document", "n.text")
 
     # entidades: "Tipo: nome. descrição"
-    embedar(
+    criar_embedding(
         "__Entity__",
         "head([l IN labels(n) WHERE l <> '__Entity__']) + ': ' + n.id "
         "+ coalesce('. ' + n.descricao, '')",
