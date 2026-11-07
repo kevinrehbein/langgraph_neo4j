@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
-from prompts import SUPERVISOR_PROMPT
 
+from .prompts import SUPERVISOR_PROMPT
 from .schemas import SupervisorDecision
 from .state import AgentState
 from .utils import get_llm
