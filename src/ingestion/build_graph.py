@@ -157,7 +157,7 @@ def carregar(path: Path) -> set[str]:
                 continue
             try:
                 ids.add(json.loads(linha)["id"])
-            except json.JSONDecodeError, KeyError:
+            except (json.JSONDecodeError, KeyError):
                 continue  # ignora linhas corrompidas
     return ids
 

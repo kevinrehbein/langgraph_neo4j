@@ -33,7 +33,7 @@ llm = init_chat_model(
     temperature=0,
 )
 # Juiz: de preferência um modelo diferente do que gera as respostas (gemma).
-juiz = LangchainLLMWrapper(langchain_llm=llm)
+juiz = LangchainLLMWrapper(langchain_llm=llm) # type: ignore
 
 embeddings = LangchainEmbeddingsWrapper(
     HuggingFaceEmbeddings(

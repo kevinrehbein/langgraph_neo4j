@@ -1,19 +1,28 @@
-from dotenv import load_dotenv
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_ollama import ChatOllama
-from langchain_neo4j import Neo4jGraph
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
 
 load_dotenv()
-"""
-llm = init_chat_model(
-    model="qwen3.5:9b",
-    model_provider="ollama",
-)
-"""
 
+# --- Diretórios ---
+ROOT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_DIR = ROOT_DIR / "data" / "outputs"
 
-# llm_backup1 = init_chat_model(model="llama-3.3-70b-versatile", model_provider="groq")
-# llm_backup2 = init_chat_model("openai/gpt-oss-120b", model_provider="groq")
+# --- Grafo (Neo4j) ---
+NEO4J_URI = os.getenv("NEO4J_URI")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 
-# llm = llm_principal.with_fallbacks([llm_backup1, llm_backup2])
+# --- Hiperparâmetros GraphRAG ---
+TOP_K = 6
+N_ENTIDADES = 5
+SCORE_MIN = 0.5
+TETO_GRAU = 350
+K_GRAFO = 3
+RELACOES_POR_ENTIDADE = 4
+MAX_RELACOES = 20
+
+# --- Limites do Grafo de Agentes ---
+MAX_ITERATIONS = 3

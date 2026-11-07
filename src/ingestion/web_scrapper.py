@@ -27,7 +27,7 @@ def carregar_metadados() -> list[dict]:
     try:
         dados = METADADOS.read_text(encoding="utf-8")
         return json.loads(dados)
-    except json.JSONDecodeError, ValueError:
+    except (json.JSONDecodeError, ValueError):
         return []
 
 
