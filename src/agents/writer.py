@@ -1,56 +1,37 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+from config import WRITER_TEMPERATURE
+
+from .llm import get_llm
 from .prompts import WRITER_PROMPT
 from .state import AgentState
-from .utils import get_llm
+from .utils import (
+    build_revision_alert,
+    get_research_evidence,
+    get_user_question,
+    message_text,
+)
+
+_INSTRUCTIONS = {
+    "qa": "Escreva uma resposta curta e direta respondendo exatamente o que foi perguntado.",
+    "sintese": "Escreva uma síntese acadêmica detalhada, separada por seções (Markdown) e cite as fontes.",
+}
 
 
 def redator_node(state: AgentState) -> dict:
-    """
-    Agente responsável por responder perguntas diretas (QA) ou criar sínteses acadêmicas.
-    Usa os dados coletados pelas ferramentas e reescreve caso haja feedback do Verificador.
-    """
-    intent = state.get("intent", "qa")
-    feedback = state.get("feedback")
-
-    # Encontra a pergunta original
-    mensagens_humanas = [m for m in state["messages"] if m.type == "human"]
-    ultima_mensagem = mensagens_humanas[-1].content if mensagens_humanas else ""
-
-    # Apenas contexto da última iteração
-    tool_messages = []
-    for msg in reversed(state["messages"]):
-        if msg.type == "tool":
-            tool_messages.append(msg)
-            break
-
-    context = "\n\n".join(
-        [f"--- Origem: {msg.name} ---\n{msg.content}" for msg in tool_messages]
-    )
-
-    instrucao = (
-        "Escreva uma resposta curta e direta respondendo exatamente o que foi perguntado."
-        if intent == "qa"
-        else "Escreva uma síntese acadêmica detalhada, separada por seções (Markdown) e cite as fontes."
-    )
-
-    if feedback:
-        instrucao += (
-            f"\n\n🚨 ALERTA DE REVISÃO DO AVALIADOR 🚨\n"
-            f"Sua tentativa anterior foi REJEITADA pelo seguinte motivo:\n"
-            f"'{feedback}'\n"
-            f"CORRIJA ESTE ERRO AGORA. Baseie-se apenas nas evidências acima."
-        )
+    """Responde perguntas diretas (QA) ou cria sínteses; reescreve se houver feedback."""
+    instrucao = _INSTRUCTIONS.get(state.get("intent") or "qa", _INSTRUCTIONS["sintese"])
+    instrucao += build_revision_alert(state.get("feedback"), "texto")
 
     prompt = ChatPromptTemplate.from_messages(
         [("system", WRITER_PROMPT), ("user", "Pergunta do usuário: {input}")]
     )
-
-    llm = get_llm(temperature=0.3)
-    chain = prompt | llm
-
-    resposta = chain.invoke(
-        {"contexto": context, "instrucao": instrucao, "input": ultima_mensagem}
+    pipe = prompt | get_llm(temperature=WRITER_TEMPERATURE)
+    resposta = pipe.invoke(
+        {
+            "contexto": get_research_evidence(state),
+            "instrucao": instrucao,
+            "input": get_user_question(state),
+        }
     )
-
-    return {"draft": resposta.content}
+    return {"draft": message_text(resposta)}

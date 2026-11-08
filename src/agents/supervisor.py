@@ -1,48 +1,50 @@
+import logging
+
 from langchain_core.prompts import ChatPromptTemplate
 
+from .llm import get_structured_llm
 from .prompts import SUPERVISOR_PROMPT
 from .schemas import SupervisorDecision
 from .state import AgentState
-from .utils import get_llm
+from .utils import get_user_question
 
+logger = logging.getLogger(__name__)
 
 def supervisor_node(state: AgentState) -> dict:
 
-    ultima_mensagem = state["messages"][-1].content
-    iteracao_atual = state.get("iteration_count", 0)
-    intent = state.get("intent", "")
-    feedback = state.get("feedback", "")
-    is_valid = state.get("is_valid", False)
-
-    if iteracao_atual > 0:
-        print(f"[Supervisor] ReAct Loop (Iteração {iteracao_atual})")
+    iteration = state.get("iteration_count", 0)
+    if iteration > 0:
+        logger.info("Supervisor: reclassificação (iteração %d)", iteration)
 
     prompt = ChatPromptTemplate.from_messages(
         [("system", SUPERVISOR_PROMPT), ("user", "{input}")]
     )
 
-    llm = get_llm()
+    pipe = prompt | get_structured_llm(SupervisorDecision)
 
-    structured_llm = llm.with_structured_output(SupervisorDecision)
+    decision = pipe.invoke({
+        "input": get_user_question(state),
+        "iteracao": iteration,
+        "intent": state.get("intent") or "ainda não classificada",
+        "feedback": state.get("feedback") or "Nenhuma (primeira tentativa)",
+    })
 
-    pipe = prompt | structured_llm
-
-    ultima_mensagem = state["messages"][-1].content
-
-    resultado = pipe.invoke(
-        {
-            "input": ultima_mensagem,
-            "intent": intent,
-            "feedback": feedback,
-            "iteracao": iteracao_atual,
-        }
+    logger.info(
+        "Supervisor: intent=%s | complexidade=%s | diretiva=%s",
+        decision.intent, decision.complexity, decision.research_directive,
     )
 
-    print(f"[Supervisor] Intent: {resultado.intent}")
-    print(f"[Supervisor] Nova Diretiva: {resultado.research_directive}")
-
-    return {
-        "intent": resultado.intent,
-        "research_directive": resultado.research_directive,
-        "is_valid": is_valid,
+    estado = {
+        "intent": decision.intent,
+        "complexity": decision.complexity,
+        "research_directive": decision.research_directive,
     }
+
+    #inicia uma pesquisa simples, 1 passo
+    if decision.intent != "fora_dominio" and decision.complexity == "simples":
+        estado.update(plan_steps=[decision.research_directive], step_index=0)
+
+    if decision.intent == "plano":
+        estado.update(complexity="complexa")
+
+    return estado
