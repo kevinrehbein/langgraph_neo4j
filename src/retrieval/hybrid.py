@@ -1,9 +1,8 @@
 import logging
 import threading
 
-from langchain_huggingface import HuggingFaceEmbeddings
-
 from config import (
+    EMBEDDING_SPACE,
     K_GRAFO,
     MAX_RELACOES,
     N_ENTIDADES,
@@ -14,19 +13,9 @@ from config import (
 )
 
 from .connection import get_graph
+from .embeddings import SpaceEmbeddings
 
 logger = logging.getLogger(__name__)
-
-EMBEDDING_MODEL = "BAAI/bge-m3"
-
-
-def _resolve_device() -> str:
-    # Import tardio: torch é pesado e só é necessário para detectar a GPU.
-    try:
-        import torch
-    except ImportError:
-        return "cpu"
-    return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class HybridRetriever:
@@ -36,11 +25,7 @@ class HybridRetriever:
     _lock = threading.Lock()
 
     def __init__(self) -> None:
-        self.embedding_model = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL,
-            model_kwargs={"device": _resolve_device()},
-            encode_kwargs={"normalize_embeddings": True, "batch_size": 16},
-        )
+        self.embedding_model = SpaceEmbeddings(EMBEDDING_SPACE)  # type: ignore
         self.graph = get_graph()
 
     @classmethod
@@ -51,7 +36,6 @@ class HybridRetriever:
                 if cls._instance is None:
                     cls._instance = cls()
         return cls._instance
-
 
     def _chunks_entrada(self, vec: list[float]) -> list[dict]:
         return self.graph.query(
@@ -130,7 +114,9 @@ class HybridRetriever:
         if not relacoes:
             return "Nenhuma relação direta encontrada no grafo.\n\n"
 
-        descricoes = {e["nome"]: e["descricao"] for e in nos_entrada if e.get("descricao")}
+        descricoes = {
+            e["nome"]: e["descricao"] for e in nos_entrada if e.get("descricao")
+        }
         for rel in relacoes:
             if rel["desc_origem"]:
                 descricoes.setdefault(rel["origem"], rel["desc_origem"])
@@ -155,7 +141,6 @@ class HybridRetriever:
         )
         return f"=== TRECHOS DE ARTIGOS (CHUNKS) ===\n{corpo}"
 
-
     def recuperar_contexto(self, pergunta: str) -> str:
         """Pipeline GraphRAG: retorna o contexto formatado para o LLM."""
         vec = self.embedding_model.embed_query(pergunta)
@@ -177,7 +162,10 @@ class HybridRetriever:
 
         logger.debug(
             "GraphRAG: %d chunks, %d entidades, %d relações, %d chunks extras",
-            len(chunks_base), len(nos_entrada), len(relacoes), len(chunks_extras),
+            len(chunks_base),
+            len(nos_entrada),
+            len(relacoes),
+            len(chunks_extras),
         )
         return self._formatar_relacoes(nos_entrada, relacoes) + self._formatar_chunks(
             chunks_base + chunks_extras

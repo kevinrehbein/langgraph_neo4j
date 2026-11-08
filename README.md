@@ -1,4 +1,14 @@
 # agents
+---
+title: WIT Assistant
+emoji: 🎓
+sdk: gradio
+sdk_version: 5.49.1
+python_version: "3.11"
+app_file: app.py
+pinned: false
+---
+
 graphrag/
 ├── docker-compose.yml        # Neo4j (com APOC, se precisar)
 ├── .env                      # NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD, OPENAI_API_KEY

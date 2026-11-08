@@ -25,7 +25,9 @@ MAX_RELACOES = 20
 
 # --- Limites do grafo de agentes ---
 MAX_ITERATIONS = 3  # passagens pelo verificador (todos os ciclos de correção somados)
-MAX_PLAN_STEPS = 3  # passos de pesquisa gerados pelo decompositor / pedidos pelo verificador
+MAX_PLAN_STEPS = (
+    3  # passos de pesquisa gerados pelo decompositor / pedidos pelo verificador
+)
 MAX_TOOL_CALLS = 3  # ferramentas chamadas em paralelo por rodada
 
 GRAPH_RECURSION_LIMIT = 100
@@ -34,9 +36,12 @@ EVIDENCE_CHAR_LIMIT = 24000  # teto de evidências enviadas ao LLM (custo/latên
 TOOL_ERROR = "Erro ao consultar a base do WIT. Tente reformular a busca."
 WRITER_TEMPERATURE = 0.3
 
+# --- Embeddings (Space do Hugging Face) ---
+EMBEDDING_SPACE = os.getenv("EMBEDDING_SPACE")
+
 
 LLM_CHAIN: list[tuple[str, str]] = [
-    # Alta Velocidade e Estabilidade (Workhorses)
+    # Alta Velocidade 
     ("google_genai", "gemma-4-26b-a4b-it"),
     ("google_genai", "gemini-3.5-flash-lite"),
     ("google_genai", "gemini-3.1-flash-lite"),
@@ -44,7 +49,6 @@ LLM_CHAIN: list[tuple[str, str]] = [
     ("groq", "qwen/qwen3.8-27b"),
     ("google_genai", "gemma-4-31b-it"),
     ("google_genai", "gemini-2.5-flash-lite"),
-
     # Último Recurso)
     ("openrouter", "google/gemma-4-26b-a4b-it:free"),
     ("openrouter", "google/gemma-4-31b-it:free"),
@@ -57,12 +61,14 @@ PROVIDER_API_KEYS: dict[str, str] = {
     "groq": "GROQ_API_KEY",
 }
 
+
 def validate_config() -> None:
-    """Falha cedo, com mensagem clara, se faltar configuração obrigatória."""
+
     required = {
         "NEO4J_URI": NEO4J_URI,
         "NEO4J_USERNAME": NEO4J_USERNAME,
         "NEO4J_PASSWORD": NEO4J_PASSWORD,
+        "EMBEDDING_SPACE": EMBEDDING_SPACE,
     }
     missing = [name for name, value in required.items() if not value]
     if missing:

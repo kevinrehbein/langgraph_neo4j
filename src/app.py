@@ -3,6 +3,7 @@
 import logging
 
 import streamlit as st
+from PIL import Image
 
 from agents.graph import graph_builder
 from agents.state import initial_state
@@ -11,9 +12,11 @@ from config import GRAPH_RECURSION_LIMIT, MAX_QUESTION_CHARS, validate_config
 from retrieval.hybrid import HybridRetriever
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s [%(name)s] %(message)s")
-logger = logging.getLogger("wit.app")
+logger = logging.getLogger("menidas_digitais.app")
 
-st.set_page_config(page_title="WIT Assistant", page_icon="🎓")
+img_icon = Image.open("/media/meninas-digitais-icon.png")
+
+st.set_page_config(page_title="Meninas Digitais Assistente", page_icon=img_icon)
 
 EXAMPLES = [
     "Quais artigos falam sobre mentoria para meninas?",
@@ -29,11 +32,13 @@ NODE_LABELS = {
 }
 
 
-@st.cache_resource(show_spinner="Carregando modelo de embeddings e conectando ao grafo…")
+@st.cache_resource(
+    show_spinner="Carregando modelo de embeddings e conectando ao grafo…"
+)
 def load_graph():
     """Roda uma vez por processo: aquece o BGE-M3 e compila o grafo."""
     validate_config()
-    HybridRetriever.get_instance()
+    HybridRetriever.get_instance().embedding_model.embed_query("ping")
     return graph_builder()
 
 
@@ -78,8 +83,10 @@ def run_question(graph, question: str) -> dict:
 
 
 # ----------------------------------------------------------------------- UI
-st.title("🎓 Assistente Meninas Digitais")
-st.caption("Respostas fundamentadas nos artigos do WIT. Cada pergunta é independente (sem memória de conversa).")
+st.title("Assistente Meninas Digitais")
+st.caption(
+    "Respostas fundamentadas nos artigos do WIT. Cada pergunta é independente (sem memória de conversa)."
+)
 
 try:
     graph = load_graph()
@@ -109,7 +116,9 @@ for message in st.session_state.history:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-question = st.chat_input("Pergunte sobre o WIT…") or st.session_state.pop("pending", None)
+question = st.chat_input("Pergunte sobre o WIT…") or st.session_state.pop(
+    "pending", None
+)
 
 if question:
     question = question.strip()
@@ -126,7 +135,9 @@ if question:
             final = run_question(graph, question)
         except Exception:
             logger.exception("Falha ao processar a pergunta")
-            st.error("Ocorreu um erro ao processar sua pergunta. Veja os logs para detalhes.")
+            st.error(
+                "Ocorreu um erro ao processar sua pergunta. Veja os logs para detalhes."
+            )
             st.stop()
 
         answer = format_final_response(final.get("final_response"))
