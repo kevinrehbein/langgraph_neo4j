@@ -14,7 +14,7 @@ from retrieval.hybrid import HybridRetriever
 logging.basicConfig(level=logging.INFO, format="%(levelname)s [%(name)s] %(message)s")
 logger = logging.getLogger("menidas_digitais.app")
 
-img_icon = Image.open("/media/meninas-digitais-icon.png")
+img_icon = Image.open("media/meninas-digitais-icon.png")
 
 st.set_page_config(page_title="Meninas Digitais Assistente", page_icon=img_icon)
 
@@ -59,9 +59,7 @@ def describe(node: str, update: dict) -> str:
     if node == "pesquisador_tools":
         return "📚 Ferramentas — evidências recebidas"
     if node == "verificador":
-        feedback = update.get("feedback")
-        extra = f"\n> {feedback}" if feedback else ""
-        return f"🧪 **Verificador** — veredito `{update.get('verdict')}`{extra}"
+        return f"🧪 **Verificador** — veredito `{update.get('verdict')}`"
     return NODE_LABELS.get(node, node)
 
 
