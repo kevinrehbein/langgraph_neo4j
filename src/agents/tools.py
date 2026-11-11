@@ -27,26 +27,7 @@ def _safe_tool(func):
 
 @tool
 @_safe_tool
-def buscar_artigos_wit(query: str) -> str:
-    """
-    Lista os artigos do evento Women in Information Technology (WIT) mais relevantes
-    para um texto ou pergunta, com um trecho de cada um.
-
-    Args:
-        query: O termo de busca ou pergunta (ex: "inclusão de mulheres na programação").
-    """
-    results = HybridRetriever.get_instance().buscar_artigos(query)
-    if not results:
-        return "Nenhum artigo encontrado para esta busca no WIT."
-    return formatting.formatar_fontes(
-        [{"titulo": a["titulo"], "url": a["url"], "corpo": a["trecho"]} for a in results],
-        consulta=query,
-    )
-
-
-@tool
-@_safe_tool
-def pesquisar_contexto_wit(pergunta: str) -> str:
+def pesquisar_contexto_wit(pergunta: str, listar_artigos: bool = False) -> str:
     """
     Busca informações cruciais na base de dados do evento Women in Information Technology (WIT).
     Usa GraphRAG para cruzar similaridade de artigos com relações de entidades no Neo4j.
@@ -54,8 +35,12 @@ def pesquisar_contexto_wit(pergunta: str) -> str:
 
     Args:
         pergunta: A dúvida ou tópico a ser pesquisado (ex: "projetos de mentoria para meninas").
+        listar_artigos: True para perguntas de listagem ("quais artigos...?"),
+            devolvendo no máximo um trecho por artigo.
     """
-    return HybridRetriever.get_instance().recuperar_contexto(pergunta)
+    return HybridRetriever.get_instance().recuperar_contexto(
+        pergunta, um_por_artigo=listar_artigos
+    )
 
 
 @tool
@@ -129,7 +114,6 @@ def autores_do_artigo(titulo: str) -> str:
 
 
 RESEARCHER_TOOLS: list[BaseTool] = [
-    buscar_artigos_wit,
     pesquisar_contexto_wit,
     buscar_projetos_semelhantes,
     artigos_do_autor,

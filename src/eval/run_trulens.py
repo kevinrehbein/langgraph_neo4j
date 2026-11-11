@@ -1,12 +1,3 @@
-"""Avaliação com TruLens: Answer Relevance, Context Relevance e Groundedness.
-
-Execute na raiz do projeto:  uv run src/eval/run_trulens.py
-
-Pré-requisito: todas as ferramentas de busca devolvem a evidência via
-`retrieval.formatting.formatar_fontes` (formato único `[FONTE: título | url]`).
-Este script instrumenta essa função, que vira o único span de RETRIEVAL.
-"""
-
 import os
 
 os.environ["TRULENS_OTEL_TRACING"] = "1"  # tem que vir ANTES de importar o trulens
@@ -30,7 +21,7 @@ from config import GRAPH_RECURSION_LIMIT, validate_config
 from retrieval import formatting
 from retrieval.hybrid import HybridRetriever
 
-JUDGE_MODEL = "gemini/gemini-3.1-flash-lite"  # juiz diferente dos modelos da LLM_CHAIN
+JUDGE_MODEL = "gemini/gemini-3.1-flash-lite"
 APP_VERSION = "v1"  # mude a cada experimento para comparar no Leaderboard
 
 PERGUNTAS = [
@@ -39,29 +30,63 @@ PERGUNTAS = [
     "Crie um plano de projeto de oficina de programação para alunas do ensino médio.",
 ]
 
+# Contextos já enviados ao juiz na pergunta atual (evita duplicatas inflando
+# Groundedness quando várias ferramentas devolvem os mesmos chunks).
+_vistos: set[str] = set()
+
+
+def _novos(contextos: list[str]) -> list[str]:
+    out = []
+    for c in contextos:
+        if c not in _vistos:
+            _vistos.add(c)
+            out.append(c)
+    return out
+
 
 # ------------------------------------------------------------------ RETRIEVAL
 def _attrs_formatador(ret, exception, *args, **kwargs):
     """Cada chamada de formatar_fontes vira um span RETRIEVAL.
 
-    A saída é um texto com blocos `[FONTE: título | url]`; aqui cada bloco
-    vira um contexto separado para o juiz.
+    Os contextos são montados direto de `itens` (sem re-parsear a string).
     """
+    itens = args[0] if args else kwargs.get("itens", [])
     consulta = kwargs.get("consulta") or (args[1] if len(args) > 1 else "")
-    texto = ret if isinstance(ret, str) else ""
-    contextos = ["[FONTE: " + p.strip() for p in texto.split("[FONTE: ") if p.strip()]
+    contextos = _novos(
+        [
+            f"[FONTE: {i.get('titulo') or 'Sem título'} | {i.get('url') or ''}]\n"
+            f"{i.get('corpo') or ''}".rstrip()
+            for i in itens
+        ]
+    )
     return {
         SpanAttributes.RETRIEVAL.QUERY_TEXT: consulta,
         SpanAttributes.RETRIEVAL.RETRIEVED_CONTEXTS: contextos,
     }
 
 
-# Instrumenta por fora: o código em src/ continua sem TruLens. Funciona porque
-# hybrid.py e tools.py chamam `formatting.formatar_fontes(...)` pelo módulo.
+def _attrs_relacoes(ret, exception, *args, **kwargs):
+    """Bloco de entidades/relações do GraphRAG como contexto para o juiz."""
+    texto = ret.strip() if isinstance(ret, str) else ""
+    vazio = not texto or texto.startswith("Nenhuma relação direta")
+    return {
+        SpanAttributes.RETRIEVAL.QUERY_TEXT: "relações do grafo",
+        SpanAttributes.RETRIEVAL.RETRIEVED_CONTEXTS: [] if vazio else _novos([texto]),
+    }
+
+
+# Instrumenta por fora: o código em src/ continua sem TruLens.
 formatting.formatar_fontes = instrument(
     span_type=SpanAttributes.SpanType.RETRIEVAL,
     attributes=_attrs_formatador,
 )(formatting.formatar_fontes)
+
+HybridRetriever._formatar_relacoes = staticmethod(
+    instrument(
+        span_type=SpanAttributes.SpanType.RETRIEVAL,
+        attributes=_attrs_relacoes,
+    )(HybridRetriever._formatar_relacoes)
+)
 
 
 class MeninasDigitaisApp:
@@ -76,6 +101,7 @@ class MeninasDigitaisApp:
         },
     )
     def ask(self, pergunta: str) -> str:
+        _vistos.clear()
         state = self.graph.invoke(
             initial_state(pergunta),
             config={"recursion_limit": GRAPH_RECURSION_LIMIT},
@@ -83,7 +109,7 @@ class MeninasDigitaisApp:
         return format_final_response(state.get("final_response"))
 
 
-# -------------------------------------------------------------------- MÉTRICAS
+# MÉTRICAS
 judge = LiteLLM(model_engine=JUDGE_MODEL)
 
 f_answer = Metric(
@@ -122,15 +148,14 @@ f_ground = Metric(
     },
 )
 
-
-# ------------------------------------------------------------------------ RODAR
 def main() -> None:
+
     validate_config()
     # Acorda o Space de embeddings fora dos registros (não distorce latência/notas).
     HybridRetriever.get_instance().embedding_model.embed_query("ping")
 
     session = TruSession()
-    session.reset_database()  # descomente SÓ numa execução para apagar o histórico
+    session.reset_database()
 
     app = MeninasDigitaisApp()
     tru = TruGraph(
@@ -141,13 +166,16 @@ def main() -> None:
         feedbacks=[f_answer, f_context, f_ground],
     )
 
-    with tru:
+    with tru as recording:
         for pergunta in PERGUNTAS:
             app.ask(pergunta)
+    record_ids = [record.record_id for record in recording.records]
+
+    print("Aguardando a conclusão das avaliações...")
+    resultados = tru.retrieve_feedback_results(record_ids=record_ids, timeout=300)
+    print(resultados)
 
     run_dashboard(session)
-    # Mantém o processo vivo: o juiz roda em segundo plano e precisa terminar.
-    input("Dashboard no ar. Espere as notas aparecerem e aperte Enter para encerrar...\n")
 
 
 if __name__ == "__main__":

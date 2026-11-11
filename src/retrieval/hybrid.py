@@ -91,7 +91,7 @@ class HybridRetriever:
             },
         )
 
-    def _chunks_do_grafo(self, ents: list[str], excluir: list[str]) -> list[dict]:
+    def _chunks_do_grafo(self, ents: list[str], excluir: list[str], vec: list[float]) -> list[dict]:
         # O CASE evita log(1) = 0 -> divisão por zero quando n_mentions é 0/nulo.
         return self.graph.query(
             """
@@ -104,12 +104,27 @@ class HybridRetriever:
             ORDER BY relevancia DESC
             LIMIT $k
             OPTIONAL MATCH (d)-[:PARTE_DE]->(a:Artigo)
-            RETURN d.id AS id, d.text AS texto, relevancia, a.titulo AS titulo, a.url_artigo AS url
+            RETURN d.id AS id, d.text AS texto, relevancia,
+                coalesce(vector.similarity.cosine(d.embedding, $vec), 0.0) AS score,
+                a.titulo AS titulo, a.url_artigo AS url
             """,
-            {"ents": ents, "excluir": excluir, "k": K_GRAFO},
+            {"ents": ents, "excluir": excluir, "k": K_GRAFO, "vec": vec},
         )
 
-    # --------------------------------------------------------------- formatação
+    @staticmethod
+    def _ordenar_por_score(chunks: list[dict], um_por_artigo: bool = False) -> list[dict]:
+        ordenados = sorted(chunks, key=lambda c: c.get("score") or 0.0, reverse=True)
+        if not um_por_artigo:
+            return ordenados
+        vistos: set[str] = set()
+        saida = []
+        for c in ordenados:
+            chave = c.get("titulo") or c["id"]
+            if chave not in vistos:
+                vistos.add(chave)
+                saida.append(c)
+        return saida
+
     @staticmethod
     def _formatar_relacoes(nos_entrada: list[dict], relacoes: list[dict]) -> str:
         if not relacoes:
@@ -136,7 +151,7 @@ class HybridRetriever:
     @staticmethod
     def _formatar_chunks(chunks: list[dict], consulta: str = "") -> str:
         if not chunks:
-            return "=== TRECHOS DE ARTIGOS (CHUNKS) ===\nNenhum trecho relevante encontrado."
+            return ""
         corpo = formatting.formatar_fontes(
             [
                 {"titulo": c.get("titulo"), "url": c.get("url"), "corpo": c["texto"]}
@@ -146,7 +161,7 @@ class HybridRetriever:
         )
         return f"=== TRECHOS DE ARTIGOS (CHUNKS) ===\n{corpo}"
 
-    def recuperar_contexto(self, pergunta: str) -> str:
+    def recuperar_contexto(self, pergunta: str, um_por_artigo: bool = False) -> str:
         """Pipeline GraphRAG: retorna o contexto formatado para o LLM."""
         vec = self.embedding_model.embed_query(pergunta)
 
@@ -162,8 +177,10 @@ class HybridRetriever:
             for r in relacoes:
                 todos.update((r["eid_origem"], r["eid_destino"]))
             chunks_extras = self._chunks_do_grafo(
-                list(todos), excluir=[c["id"] for c in chunks_base]
+                list(todos), excluir=[c["id"] for c in chunks_base], vec=vec
             )
+
+        chunks = self._ordenar_por_score(chunks_base + chunks_extras, um_por_artigo)
 
         logger.debug(
             "GraphRAG: %d chunks, %d entidades, %d relações, %d chunks extras",
@@ -173,21 +190,5 @@ class HybridRetriever:
             len(chunks_extras),
         )
         return self._formatar_relacoes(nos_entrada, relacoes) + self._formatar_chunks(
-            chunks_base + chunks_extras, pergunta
+            chunks, pergunta
         )
-
-    def buscar_artigos(self, consulta: str) -> list[dict]:
-        """Artigos mais relevantes (melhor chunk por artigo), ordenados por score."""
-        vec = self.embedding_model.embed_query(consulta)
-        artigos: dict[str, dict] = {}
-        for c in self._chunks_entrada(vec):
-            titulo = c.get("titulo") or "Sem título"
-            atual = artigos.get(titulo)
-            if atual is None or c["score"] > atual["score"]:
-                artigos[titulo] = {
-                    "url": c.get("url"),
-                    "titulo": titulo,
-                    "score": round(c["score"], 3),
-                    "trecho": (c["texto"] or ""),
-                }
-        return sorted(artigos.values(), key=lambda a: a["score"], reverse=True)

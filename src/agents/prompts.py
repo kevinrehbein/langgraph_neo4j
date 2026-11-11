@@ -39,8 +39,8 @@ Passo atual ({step_number}/{total_steps}): {step}
 
 Regras para escolha de ferramentas:
 1. Passo voltado a planejar um projeto: use `buscar_projetos_semelhantes` e/ou `pesquisar_contexto_wit`.
-2. Passo de síntese ou pergunta genérica: use `pesquisar_contexto_wit`; use `buscar_artigos_wit` para listar artigos.
-3. Passo sobre autor ou pessoa específica: use `perfil_entidade`.
+2. Passo de síntese ou pergunta genérica: use `pesquisar_contexto_wit`.
+3. Passo sobre autor ou pessoa específica: use `artigos_do_autor` e `autores_do_artigo`.
 
 Chame no máximo {max_calls} ferramentas para coletar evidências deste passo. Não responda ao usuário.
 """
