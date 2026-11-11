@@ -1,1 +1,50 @@
-   {"id": "q1", "tipo": "lista", "pergunta": "Quais oficinas de programação foram realizadas para meninas do ensino médio?", "referencia": "Resposta correta escrita por você, com os nomes específicos."}
+{"id": "q1", "tipo": "multi-salto", "pergunta": "Quais projetos realizam ações dirigidas a meninas do ensino médio e a quais instituições esses projetos estão vinculados?", "referencia": ""}
+{"id": "q2", "tipo": "multi-salto", "pergunta": "Que ferramentas são desenvolvidas por projetos que também realizam oficinas de programação?", "referencia": ""}
+{"id": "q3", "tipo": "multi-salto", "pergunta": "Quais conceitos são abordados por projetos vinculados a universidades federais?", "referencia": ""}
+{"id": "q4", "tipo": "multi-salto", "pergunta": "Quais resultados foram produzidos por ações que utilizam Scratch e quais públicos esses resultados impactam?", "referencia": ""}
+{"id": "q5", "tipo": "multi-salto", "pergunta": "Em quais locais acontecem as ações que abordam pensamento computacional?", "referencia": ""}
+{"id": "q6", "tipo": "multi-salto", "pergunta": "Quais projetos desenvolvem ferramentas e a quais públicos essas ferramentas são dirigidas?", "referencia": ""}
+{"id": "q7", "tipo": "multi-salto", "pergunta": "Que áreas do conhecimento estão associadas a projetos que realizam ações de robótica?", "referencia": ""}
+{"id": "q8", "tipo": "multi-salto", "pergunta": "Quais instituições estão ligadas a projetos cujas ações produziram aumento de interesse pela computação?", "referencia": ""}
+{"id": "q9", "tipo": "multi-salto", "pergunta": "Quais ações dirigidas a meninas do ensino fundamental estão ligadas a projetos parceiros do Programa Meninas Digitais?", "referencia": ""}
+{"id": "q10", "tipo": "vinculo", "pergunta": "Quais projetos estão vinculados a outros projetos e qual é a relação entre eles?", "referencia": ""}
+{"id": "q11", "tipo": "vinculo", "pergunta": "Quais projetos estão vinculados ao Programa Meninas Digitais da SBC?", "referencia": ""}
+{"id": "q12", "tipo": "vinculo", "pergunta": "Quais projetos ou ações estão ligados ao projeto Mermãs Digitais e a que instituição pertencem?", "referencia": ""}
+{"id": "q13", "tipo": "vinculo", "pergunta": "Quais projetos têm parceria com Django Girls ou Girls Code e que ações realizam?", "referencia": ""}
+{"id": "q14", "tipo": "vinculo", "pergunta": "Quais projetos compartilham a mesma instituição de origem?", "referencia": ""}
+{"id": "q15", "tipo": "vinculo", "pergunta": "Quais instituições aparecem associadas a mais de um projeto voltado a meninas?", "referencia": ""}
+{"id": "q16", "tipo": "local", "pergunta": "Em quais estados brasileiros foram realizadas ações voltadas a meninas da educação básica?", "referencia": ""}
+{"id": "q17", "tipo": "local", "pergunta": "Quais ações aconteceram em escolas públicas de ensino médio e quais projetos as realizaram?", "referencia": ""}
+{"id": "q18", "tipo": "local", "pergunta": "Quais projetos atuam em regiões com acesso limitado à internet ou a equipamentos e que ações adotam para contornar isso?", "referencia": ""}
+{"id": "q19", "tipo": "local", "pergunta": "Que ações foram realizadas em institutos federais de ensino e por quais projetos?", "referencia": ""}
+{"id": "q20", "tipo": "local", "pergunta": "Quais locais receberam ações de mais de um projeto diferente?", "referencia": ""}
+{"id": "q21", "tipo": "ferramenta-publico", "pergunta": "Quais ferramentas são usadas em ações dirigidas a meninas do ensino médio?", "referencia": ""}
+{"id": "q22", "tipo": "ferramenta-publico", "pergunta": "Que ferramentas foram usadas em ações dirigidas a meninas do ensino fundamental?", "referencia": ""}
+{"id": "q23", "tipo": "ferramenta-publico", "pergunta": "Quais ferramentas de jogos ou gamificação foram usadas e por quais projetos?", "referencia": ""}
+{"id": "q24", "tipo": "ferramenta-publico", "pergunta": "Quais linguagens ou ambientes de programação, como Scratch, Python e App Inventor, aparecem associados a quais públicos?", "referencia": ""}
+{"id": "q25", "tipo": "ferramenta-publico", "pergunta": "Que kits de hardware, como LEGO, LittleBits e Arduino, foram usados e em quais ações?", "referencia": ""}
+{"id": "q26", "tipo": "conceito", "pergunta": "Que conceitos são abordados tanto por oficinas de programação quanto por ações de mentoria?", "referencia": ""}
+{"id": "q27", "tipo": "conceito", "pergunta": "Quais projetos abordam pensamento computacional e a que público se dirigem?", "referencia": ""}
+{"id": "q28", "tipo": "conceito", "pergunta": "Quais conceitos aparecem associados tanto a ações de robótica quanto a ações de eletrônica?", "referencia": ""}
+{"id": "q29", "tipo": "conceito", "pergunta": "Quais projetos abordam representatividade feminina e que ações realizam para isso?", "referencia": ""}
+{"id": "q30", "tipo": "conceito", "pergunta": "Quais projetos abordam a permanência ou a evasão de mulheres em cursos superiores de computação e como atuam?", "referencia": ""}
+{"id": "q31", "tipo": "resultado", "pergunta": "Que resultados foram produzidos por oficinas de programação e quais públicos foram impactados?", "referencia": ""}
+{"id": "q32", "tipo": "resultado", "pergunta": "Quais ações produziram aumento de interesse pela área de computação e quais projetos as realizaram?", "referencia": ""}
+{"id": "q33", "tipo": "resultado", "pergunta": "Que limitações ou resultados pouco favoráveis foram relatados em ações dirigidas a meninas e por quais projetos?", "referencia": ""}
+{"id": "q34", "tipo": "resultado", "pergunta": "Quais projetos relatam impacto em professores ou na comunidade escolar, além das alunas?", "referencia": ""}
+{"id": "q35", "tipo": "resultado", "pergunta": "Que ações produziram mudança de percepção sobre programação e como essa mudança foi medida?", "referencia": ""}
+{"id": "q36", "tipo": "agregacao", "pergunta": "Quais públicos-alvo são mais frequentes nas ações descritas nos artigos?", "referencia": ""}
+{"id": "q37", "tipo": "agregacao", "pergunta": "Quais projetos realizam mais de um tipo de ação, como oficinas, palestras e mentoria?", "referencia": ""}
+{"id": "q38", "tipo": "agregacao", "pergunta": "Compare os conceitos abordados em projetos voltados ao ensino médio com os de projetos voltados ao ensino superior.", "referencia": ""}
+{"id": "q39", "tipo": "agregacao", "pergunta": "Quais ações combinam mais de uma ferramenta e que projetos as realizam?", "referencia": ""}
+{"id": "q40", "tipo": "agregacao", "pergunta": "Que áreas do conhecimento aparecem mais associadas a projetos voltados a meninas?", "referencia": ""}
+{"id": "q41", "tipo": "intersecao", "pergunta": "Que projetos realizam ações no ensino médio e também no ensino superior?", "referencia": ""}
+{"id": "q42", "tipo": "intersecao", "pergunta": "Há projetos que realizam ações tanto em escolas quanto em visitas a empresas ou universidades? Quais?", "referencia": ""}
+{"id": "q43", "tipo": "intersecao", "pergunta": "Quais instituições realizam ações e também desenvolvem ferramentas próprias?", "referencia": ""}
+{"id": "q44", "tipo": "intersecao", "pergunta": "Quais projetos realizam ações dirigidas a mais de um público, por exemplo meninas e professores?", "referencia": ""}
+{"id": "q45", "tipo": "intersecao", "pergunta": "Que ações têm como público tanto meninas do ensino médio quanto mulheres adultas?", "referencia": ""}
+{"id": "q46", "tipo": "controle", "pergunta": "Qual ferramenta gamificada foi usada na oficina de programação do IFMA Campus Imperatriz?", "referencia": ""}
+{"id": "q47", "tipo": "controle", "pergunta": "Quantas meninas participaram da oficina realizada no Centro Educativo Mbaracayú?", "referencia": ""}
+{"id": "q48", "tipo": "controle", "pergunta": "Quais são as seis oficinas do projeto Trazendo Meninas para a Computação?", "referencia": ""}
+{"id": "q49", "tipo": "controle", "pergunta": "Qual foi a duração do curso de programação e robótica na Escola de Ensino Médio Macário Borba?", "referencia": ""}
+{"id": "q50", "tipo": "controle", "pergunta": "Em que ano foi criado o projeto de extensão Mulheres na TI no IMD da UFRN?", "referencia": ""}

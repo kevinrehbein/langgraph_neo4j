@@ -1,12 +1,11 @@
 import functools
-import json
 import logging
 from typing import Literal
 
 from langchain_core.tools import BaseTool, tool
 
 from config import TOOL_ERROR
-from retrieval import queries
+from retrieval import queries, formatting
 from retrieval.hybrid import HybridRetriever
 
 logger = logging.getLogger(__name__)
@@ -39,7 +38,10 @@ def buscar_artigos_wit(query: str) -> str:
     results = HybridRetriever.get_instance().buscar_artigos(query)
     if not results:
         return "Nenhum artigo encontrado para esta busca no WIT."
-    return json.dumps(results, ensure_ascii=False, default=str)
+    return formatting.formatar_fontes(
+        [{"titulo": a["titulo"], "url": a["url"], "corpo": a["trecho"]} for a in results],
+        consulta=query,
+    )
 
 
 @tool
@@ -69,7 +71,12 @@ def buscar_projetos_semelhantes(palavras_chave: list[str]) -> str:
     results = queries.find_similar_projects_by_keyword(palavras_chave)
     if not results:
         return "Nenhum projeto estruturalmente semelhante encontrado com essas palavras-chave."
-    return json.dumps(results, ensure_ascii=False, default=str)
+    return formatting.formatar_fontes(
+        [{"titulo": r["titulo"], "url": r["url"],
+        "corpo": f"Temas em comum: {', '.join(r['temas_em_comum'])} (aderência: {r['aderencia']})"}
+        for r in results],
+        consulta=", ".join(palavras_chave),
+    )
 
 
 @tool
@@ -90,7 +97,11 @@ def artigos_do_autor(nome: str) -> str:
             "Tente outra variação (apenas o sobrenome, por exemplo)."
         )
 
-    return json.dumps(results, ensure_ascii=False, default=str)
+    return formatting.formatar_fontes(
+        [{"titulo": a["titulo"], "url": a["url"], "corpo": f"Autor(a): {r['autor']}"}
+        for r in results for a in r["artigos"]],
+        consulta=nome,
+    )
 
 
 
@@ -110,7 +121,11 @@ def autores_do_artigo(titulo: str) -> str:
             f"Nenhum artigo encontrado para '{titulo}'. "
             "Tente menos palavras, só as mais distintivas."
         )
-    return json.dumps(results, ensure_ascii=False, default=str)
+    return formatting.formatar_fontes(
+        [{"titulo": r["titulo"], "url": r["url"],
+        "corpo": f"Autores: {', '.join(r['autores'])}"} for r in results],
+        consulta=titulo,
+    )
 
 
 RESEARCHER_TOOLS: list[BaseTool] = [

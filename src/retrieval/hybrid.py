@@ -11,6 +11,7 @@ from config import (
     TETO_GRAU,
     TOP_K,
 )
+from retrieval import formatting
 
 from .connection import get_graph
 from .embeddings import SpaceEmbeddings
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 class HybridRetriever:
     """GraphRAG: busca vetorial em chunks/entidades + expansão por relações do grafo."""
 
-    _instance: "HybridRetriever | None" = None
+    _instance: "HybridRetriever | None" = None  # noqa: UP037
     _lock = threading.Lock()
 
     def __init__(self) -> None:
@@ -29,7 +30,7 @@ class HybridRetriever:
         self.graph = get_graph()
 
     @classmethod
-    def get_instance(cls) -> "HybridRetriever":
+    def get_instance(cls) -> "HybridRetriever":  # noqa: UP037
         """Singleton thread-safe: evita recarregar o BGE-M3 a cada chamada."""
         if cls._instance is None:
             with cls._lock:
@@ -133,12 +134,15 @@ class HybridRetriever:
         )
 
     @staticmethod
-    def _formatar_chunks(chunks: list[dict]) -> str:
+    def _formatar_chunks(chunks: list[dict], consulta: str = "") -> str:
         if not chunks:
             return "=== TRECHOS DE ARTIGOS (CHUNKS) ===\nNenhum trecho relevante encontrado."
-        corpo = "\n\n".join(
-            f"[FONTE: {c.get('titulo') or 'Sem título'} | {c.get('url') or ''}]\n{c['texto']}"
-            for c in chunks
+        corpo = formatting.formatar_fontes(
+            [
+                {"titulo": c.get("titulo"), "url": c.get("url"), "corpo": c["texto"]}
+                for c in chunks
+            ],
+            consulta=consulta,
         )
         return f"=== TRECHOS DE ARTIGOS (CHUNKS) ===\n{corpo}"
 
@@ -169,7 +173,7 @@ class HybridRetriever:
             len(chunks_extras),
         )
         return self._formatar_relacoes(nos_entrada, relacoes) + self._formatar_chunks(
-            chunks_base + chunks_extras
+            chunks_base + chunks_extras, pergunta
         )
 
     def buscar_artigos(self, consulta: str) -> list[dict]:
@@ -184,6 +188,6 @@ class HybridRetriever:
                     "url": c.get("url"),
                     "titulo": titulo,
                     "score": round(c["score"], 3),
-                    "trecho": (c["texto"] or "")[:400],
+                    "trecho": (c["texto"] or ""),
                 }
         return sorted(artigos.values(), key=lambda a: a["score"], reverse=True)

@@ -8,7 +8,6 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import Runnable
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
-from tenacity import stop_after_attempt
 
 from config import LLM_CHAIN, PROVIDER_API_KEYS
 

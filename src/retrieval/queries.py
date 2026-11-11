@@ -1,10 +1,4 @@
-"""Consultas Cypher estruturadas usadas pelas ferramentas do pesquisador.
-
-ASSUMPTIONS sobre o schema do grafo (ajuste se o seu for diferente):
-- (:Document)-[:PARTE_DE]->(:Artigo {titulo})
-- (:Document)-[:MENTIONS]->(:__Entity__ {id})
-- Autores são entidades com o label `Author` (id = nome).
-"""
+"""Consultas Cypher estruturadas usadas pelas ferramentas do pesquisador."""
 
 import re
 import unicodedata
@@ -35,8 +29,9 @@ def find_similar_projects_by_keyword(
         MATCH (d:Document)-[:MENTIONS]->(e)
         MATCH (d)-[:PARTE_DE]->(a:Artigo)
         RETURN a.titulo AS titulo,
-               collect(DISTINCT e.id)[..8] AS temas_em_comum,
-               count(DISTINCT e) AS aderencia
+                a.url_artigo as url,
+                collect(DISTINCT e.id)[..8] AS temas_em_comum,
+                count(DISTINCT e) AS aderencia
         ORDER BY aderencia DESC
         LIMIT $limit
         """,

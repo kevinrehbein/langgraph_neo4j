@@ -41,14 +41,14 @@ EMBEDDING_SPACE = os.getenv("EMBEDDING_SPACE")
 
 
 LLM_CHAIN: list[tuple[str, str]] = [
-    # Alta Velocidade 
+    # Alta Velocidade
     ("google_genai", "gemma-4-26b-a4b-it"),
     ("google_genai", "gemini-3.5-flash-lite"),
     ("google_genai", "gemini-3.1-flash-lite"),
-    ("groq", "openai/gpt-oss-20b"),
-    ("groq", "qwen/qwen3.8-27b"),
     ("google_genai", "gemma-4-31b-it"),
     ("google_genai", "gemini-2.5-flash-lite"),
+    ("groq", "openai/gpt-oss-20b"),
+    ("groq", "qwen/qwen3.8-27b"),
     # Último Recurso)
     ("openrouter", "google/gemma-4-26b-a4b-it:free"),
     ("openrouter", "google/gemma-4-31b-it:free"),
