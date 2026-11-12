@@ -3,6 +3,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # raiz = src/
 
+import json
+
 import numpy as np
 from langchain_ollama import ChatOllama
 from trulens.apps.app import TruApp
@@ -21,48 +23,36 @@ from retrieval.hybrid import HybridRetriever
 JUDGE_MODEL = "ollama/qwen3.5:9b"
 OLLAMA_URL = "http://localhost:11434"
 
-APP_VERSION = "v1"  # mude a cada experimento para comparar no Leaderboard
+PERGUNTAS_PATH = Path(__file__).resolve().parent / "perguntas.jsonl"
 
-PERGUNTAS = [
-    "Quais artigos falam sobre mentoria para meninas?",
-    "Faça um panorama sobre a inclusão de mulheres na computação.",
-    "Crie um plano de projeto de oficina de programação para alunas do ensino médio.",
-]
+APP_VERSION = "v1"  # mude a cada experimento para comparar no Leaderboard
 
 RETRIEVAL = SpanAttributes.SpanType.RETRIEVAL
 QUERY = SpanAttributes.RETRIEVAL.QUERY_TEXT
 CONTEXTS = SpanAttributes.RETRIEVAL.RETRIEVED_CONTEXTS
 
 
+def carregar_perguntas(limite: int | None = None) -> list[str]:
+    with PERGUNTAS_PATH.open(encoding="utf-8") as f:
+        perguntas = [json.loads(l)["pergunta"] for l in f if l.strip()]
+    return perguntas[:limite]
+
+
 # ------------------------------------------------------------------ RETRIEVAL
-def _attrs_chunks(ret, exception, *args, **kwargs) -> dict:
-    """Cada trecho de artigo recuperado vira um contexto avaliado."""
-    chunks = args[0] if args else kwargs.get("chunks", [])
-    consulta = kwargs.get("consulta") or (args[1] if len(args) > 1 else "")
-    contexts = [
-        f"[FONTE: {c.get('titulo') or 'Sem título'} | {c.get('url') or ''}]\n{c['texto']}"
-        for c in chunks
-    ]
-    return {QUERY: consulta, CONTEXTS: list(dict.fromkeys(contexts))}
-
-
-def _attrs_relations(ret, exception, *args, **kwargs) -> dict:
-    """Bloco de entidades/relações do GraphRAG como um único contexto."""
-    return {QUERY: "relações do grafo", CONTEXTS: [ret] if ret else []}
+def _attrs_context(ret, exception, *args, **kwargs) -> dict:
+    """Contexto completo da chamada (relações + chunks) como UM contexto."""
+    # método de instância: args[0] pode ser `self`
+    pergunta = kwargs.get("pergunta") or next(
+        (a for a in args if isinstance(a, str)), ""
+    )
+    return {QUERY: pergunta, CONTEXTS: [ret] if ret else []}
 
 
 def instrument_retriever() -> None:
     """Instrumenta o retriever por fora; src/ continua sem TruLens."""
-    HybridRetriever._formatar_chunks = staticmethod(
-        instrument(span_type=RETRIEVAL, attributes=_attrs_chunks)(
-            HybridRetriever._formatar_chunks
-        )
-    )
-    HybridRetriever._formatar_relacoes = staticmethod(
-        instrument(span_type=RETRIEVAL, attributes=_attrs_relations)(
-            HybridRetriever._formatar_relacoes
-        )
-    )
+    HybridRetriever.recuperar_contexto = instrument(
+        span_type=RETRIEVAL, attributes=_attrs_context
+    )(HybridRetriever.recuperar_contexto)
 
 
 # ------------------------------------------------------------------------ APP
@@ -141,7 +131,8 @@ def main() -> None:
     # Acorda o Space de embeddings fora dos registros (não distorce latência/notas).
     HybridRetriever.get_instance().embedding_model.embed_query("ping")
 
-    session = TruSession()  # sem reset_database(): preserva o histórico entre versões
+    session = TruSession()
+    session.reset_database()  # não preserva histórico anterior
     instrument_retriever()
 
     app = MeninasDigitaisApp()
@@ -154,7 +145,7 @@ def main() -> None:
     )
 
     with tru as recording:
-        for pergunta in PERGUNTAS:
+        for pergunta in carregar_perguntas():
             app.ask(pergunta)
 
     ids = [r.record_id for r in recording.records]
