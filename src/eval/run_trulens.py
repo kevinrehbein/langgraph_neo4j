@@ -3,14 +3,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # raiz = src/
 
-from litellm import api_base
 import numpy as np
+from langchain_ollama import ChatOllama
 from trulens.apps.app import TruApp
 from trulens.core import Metric, Selector, TruSession
 from trulens.core.otel.instrument import instrument
 from trulens.dashboard import run_dashboard
 from trulens.otel.semconv.trace import SpanAttributes
-from langchain_ollama import ChatOllama
 from trulens.providers.langchain import Langchain
 
 from agents.graph import graph_builder
@@ -45,6 +44,7 @@ def _attrs_chunks(ret, exception, *args, **kwargs) -> dict:
         for c in chunks
     ]
     return {QUERY: consulta, CONTEXTS: list(dict.fromkeys(contexts))}
+
 
 def _attrs_relations(ret, exception, *args, **kwargs) -> dict:
     """Bloco de entidades/relações do GraphRAG como um único contexto."""
