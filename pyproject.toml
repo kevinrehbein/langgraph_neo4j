@@ -27,7 +27,7 @@ dependencies = [
     "streamlit>=1.67.0",
     "trulens>=2.16.0",
     "trulens-apps-langgraph>=2.16.0",
-    "trulens-providers-litellm>=2.16.0",
+    "trulens-providers-langchain>=2.16.0",
 ]
 
 [project.urls]

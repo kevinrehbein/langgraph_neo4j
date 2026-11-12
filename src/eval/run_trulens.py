@@ -10,7 +10,8 @@ from trulens.core import Metric, Selector, TruSession
 from trulens.core.otel.instrument import instrument
 from trulens.dashboard import run_dashboard
 from trulens.otel.semconv.trace import SpanAttributes
-from trulens.providers.litellm import LiteLLM
+from langchain_ollama import ChatOllama
+from trulens.providers.langchain import Langchain
 
 from agents.graph import graph_builder
 from agents.state import initial_state
@@ -18,7 +19,7 @@ from agents.utils import format_final_response
 from config import GRAPH_RECURSION_LIMIT, validate_config
 from retrieval.hybrid import HybridRetriever
 
-JUDGE_MODEL = "ollama/llama3.1:8b"
+JUDGE_MODEL = "ollama/qwen3.5:9b"
 OLLAMA_URL = "http://localhost:11434"
 
 APP_VERSION = "v1"  # mude a cada experimento para comparar no Leaderboard
@@ -87,7 +88,15 @@ class MeninasDigitaisApp:
 
 
 # -------------------------------------------------------------------- MÉTRICAS
-judge = LiteLLM(model_engine=JUDGE_MODEL, api_base=OLLAMA_URL) # type: ignore
+judge = Langchain(
+    chain=ChatOllama(
+        model="qwen3.5:9b",
+        reasoning=False,
+        temperature=0,
+        num_ctx=16384,
+        base_url="http://localhost:11434",
+    )
+)
 
 f_answer = Metric(
     implementation=judge.relevance_with_cot_reasons,
