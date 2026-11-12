@@ -11,7 +11,6 @@ from config import (
     TETO_GRAU,
     TOP_K,
 )
-from retrieval import formatting
 
 from .connection import get_graph
 from .embeddings import SpaceEmbeddings
