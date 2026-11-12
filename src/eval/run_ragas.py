@@ -85,27 +85,6 @@ def fmt(c):
     return f"[FONTE: {c.get('titulo') or 'Sem título'} | {c.get('url') or ''}]\n{c['texto']}"
 
 
-def rodar(sistema, recuperar, perguntas):
-    rows = []
-    for q in perguntas:
-        chunks, rels = recuperar(emb.embed_query(q["pergunta"]))
-        prompt = PROMPT.format(
-            relacoes=f"{rels}\n" if rels else "",
-            contexto="\n\n".join(map(fmt, chunks)),
-            pergunta=q["pergunta"],
-        )
-        resposta = message_text(gen_llm.invoke(prompt))
-        print(q["id"], sistema, len(chunks), bool(rels), flush=True)
-        rows.append(
-            SingleTurnSample(
-                user_input=q["pergunta"],
-                response=resposta,
-                retrieved_contexts=[fmt(c) for c in chunks] + ([rels] if rels else []),
-            )
-        )
-    return rows
-
-
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=3, help="nº de perguntas (0 = todas)")
@@ -117,6 +96,7 @@ if __name__ == "__main__":
         if l.strip()
     ]
     perguntas = todas[:n] if n else todas
+    print(f"Dataset carregado: {len(perguntas)} pergunta(s) selecionada(s).", flush=True)
 
     emb.embed_query("ping")
     juiz, juiz_emb = LangchainLLMWrapper(judge_llm), LangchainEmbeddingsWrapper(emb) # pyright: ignore[reportArgumentType]
@@ -137,7 +117,10 @@ if __name__ == "__main__":
             if "id" in df_existente.columns:
                 processados = set(df_existente["id"].tolist())
 
-        print(f"\n--- Processando sistema: {nome} ---")
+        print(
+            f"\n=== Sistema: {nome.upper()} | Já concluídas: {len(processados)}/{len(perguntas)} ===",
+            flush=True,
+        )
 
         for q in perguntas:
             q_id = q["id"]
@@ -147,13 +130,15 @@ if __name__ == "__main__":
 
             # 1. Recuperação e Geração
             chunks, rels = fn(emb.embed_query(q["pergunta"]))
+            print(f"ID {q_id} | Chunks: {len(chunks)} | Rels: {bool(rels)} -> Gerando resposta...", flush=True)
+
             prompt = PROMPT.format(
                 relacoes=f"{rels}\n" if rels else "",
                 contexto="\n\n".join(map(fmt, chunks)),
                 pergunta=q["pergunta"],
             )
             resposta = message_text(gen_llm.invoke(prompt))
-            print(f"ID {q_id} | Chunks: {len(chunks)} | Rels: {bool(rels)}", flush=True)
+            print(f"Resposta gerada: {len(resposta)} chars).", flush=True)
 
             amostra = SingleTurnSample(
                 user_input=q["pergunta"],
@@ -162,6 +147,7 @@ if __name__ == "__main__":
             )
 
             # 2. Avaliação de amostra única
+            print("Avaliando métricas RAGAS no juiz")
             df_resultado = evaluate(
                 EvaluationDataset(samples=[amostra]),
                 metrics=metricas,
@@ -169,14 +155,16 @@ if __name__ == "__main__":
             ).to_pandas()
 
             df_resultado.insert(0, "id", q_id)
+            print("RAGAS concluído", flush=True)
 
             # 3. Gravação passo a passo (Append)
             incluir_cabecalho = not arquivo_csv.exists()
             df_resultado.to_csv(arquivo_csv, mode="a", index=False, header=incluir_cabecalho)
-
             processados.add(q_id)
+            print(f"Linha salva em {arquivo_csv.name}")
 
         # Carrega o dataset completo daquele sistema para a tabela final
+        print("\nGerando consolidação final e médias...", flush=True)
         res_consolidados[nome] = pd.read_csv(arquivo_csv)
 
     # Gera a tabela final comparativa e as médias
@@ -186,6 +174,7 @@ if __name__ == "__main__":
 
     tabela = pd.concat({k: v.set_index("id")[cols] for k, v in res_consolidados.items()}, axis=1).round(3)
     tabela.to_csv(ROOT / "ragas_por_pergunta.csv")
+    print("Execução finalizada com sucesso!", flush=True)
 
     print("\nPor pergunta:\n", tabela)
     print("\nMédia:\n", pd.DataFrame({k: v[cols].mean() for k, v in res_consolidados.items()}).round(3))

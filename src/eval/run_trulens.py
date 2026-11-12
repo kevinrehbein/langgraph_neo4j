@@ -22,7 +22,7 @@ from retrieval.hybrid import HybridRetriever
 
 PERGUNTAS_PATH = Path(__file__).resolve().parent / "perguntas.jsonl"
 
-APP_VERSION = "v1"  # mude a cada experimento para comparar no Leaderboard
+APP_VERSION = "v1"
 
 RETRIEVAL = SpanAttributes.SpanType.RETRIEVAL
 QUERY = SpanAttributes.RETRIEVAL.QUERY_TEXT
