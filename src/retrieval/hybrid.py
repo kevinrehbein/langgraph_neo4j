@@ -128,7 +128,7 @@ class HybridRetriever:
     @staticmethod
     def _formatar_relacoes(nos_entrada: list[dict], relacoes: list[dict]) -> str:
         if not relacoes:
-            return "Nenhuma relação direta encontrada no grafo.\n\n"
+            return ""
 
         descricoes = {
             e["nome"]: e["descricao"] for e in nos_entrada if e.get("descricao")
@@ -150,14 +150,12 @@ class HybridRetriever:
 
     @staticmethod
     def _formatar_chunks(chunks: list[dict], consulta: str = "") -> str:
+        # `consulta` não é usada aqui: é lida pelo extrator do TruLens (run_trulens.py).
         if not chunks:
             return ""
-        corpo = formatting.formatar_fontes(
-            [
-                {"titulo": c.get("titulo"), "url": c.get("url"), "corpo": c["texto"]}
-                for c in chunks
-            ],
-            consulta=consulta,
+        corpo = "\n\n".join(
+            f"[FONTE: {c.get('titulo') or 'Sem título'} | {c.get('url') or ''}]\n{c['texto']}".rstrip()
+            for c in chunks
         )
         return f"=== TRECHOS DE ARTIGOS (CHUNKS) ===\n{corpo}"
 

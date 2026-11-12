@@ -5,11 +5,17 @@ from typing import Literal
 from langchain_core.tools import BaseTool, tool
 
 from config import TOOL_ERROR
-from retrieval import queries, formatting
+from retrieval import queries
 from retrieval.hybrid import HybridRetriever
 
 logger = logging.getLogger(__name__)
 
+def _fontes(itens: list[tuple[str | None, str | None, str]]) -> str:
+    """Bloco [FONTE: título | url] por item (formato que o writer/verifier esperam)."""
+    return "\n\n".join(
+        f"[FONTE: {titulo or 'Sem título'} | {url or ''}]\n{corpo}".rstrip()
+        for titulo, url, corpo in itens
+    )
 
 def _safe_tool(func):
     """Falha de infraestrutura (Neo4j, embeddings) vira texto, não derruba o grafo."""
@@ -56,12 +62,11 @@ def buscar_projetos_semelhantes(palavras_chave: list[str]) -> str:
     results = queries.find_similar_projects_by_keyword(palavras_chave)
     if not results:
         return "Nenhum projeto estruturalmente semelhante encontrado com essas palavras-chave."
-    return formatting.formatar_fontes(
-        [{"titulo": r["titulo"], "url": r["url"],
-        "corpo": f"Temas em comum: {', '.join(r['temas_em_comum'])} (aderência: {r['aderencia']})"}
-        for r in results],
-        consulta=", ".join(palavras_chave),
-    )
+    return _fontes([
+        (r["titulo"], r["url"],
+        f"Temas em comum: {', '.join(r['temas_em_comum'])} (aderência: {r['aderencia']})")
+        for r in results
+    ])
 
 
 @tool
@@ -82,11 +87,10 @@ def artigos_do_autor(nome: str) -> str:
             "Tente outra variação (apenas o sobrenome, por exemplo)."
         )
 
-    return formatting.formatar_fontes(
-        [{"titulo": a["titulo"], "url": a["url"], "corpo": f"Autor(a): {r['autor']}"}
-        for r in results for a in r["artigos"]],
-        consulta=nome,
-    )
+    return _fontes([
+        (a["titulo"], a["url"], f"Autor(a): {r['autor']}")
+        for r in results for a in r["artigos"]
+    ])
 
 
 
@@ -106,11 +110,10 @@ def autores_do_artigo(titulo: str) -> str:
             f"Nenhum artigo encontrado para '{titulo}'. "
             "Tente menos palavras, só as mais distintivas."
         )
-    return formatting.formatar_fontes(
-        [{"titulo": r["titulo"], "url": r["url"],
-        "corpo": f"Autores: {', '.join(r['autores'])}"} for r in results],
-        consulta=titulo,
-    )
+    return _fontes([
+        (r["titulo"], r["url"], f"Autores: {', '.join(r['autores'])}")
+        for r in results
+    ])
 
 
 RESEARCHER_TOOLS: list[BaseTool] = [
