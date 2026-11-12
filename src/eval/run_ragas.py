@@ -48,7 +48,7 @@ r = HybridRetriever.get_instance()
 emb = r.embedding_model
 
 gen_llm = init_chat_model(
-    model="gemma-4-26b-a4b-it",
+    model="gemma-4-31b-it",
     model_provider="google_genai",
     temperature=0,
     max_retries=5,
