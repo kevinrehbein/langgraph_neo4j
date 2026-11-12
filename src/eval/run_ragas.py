@@ -48,7 +48,7 @@ r = HybridRetriever.get_instance()
 emb = r.embedding_model
 
 gen_llm = init_chat_model(
-    model="gemma-4-31b-it",
+    model="gemini-3.5-flash-lite",
     model_provider="google_genai",
     temperature=0,
     max_retries=5,
@@ -151,7 +151,7 @@ if __name__ == "__main__":
             df_resultado = evaluate(
                 EvaluationDataset(samples=[amostra]),
                 metrics=metricas,
-                run_config=RunConfig(max_workers=1, timeout=600),
+                run_config=RunConfig(max_workers=1, timeout=500),
             ).to_pandas()
 
             df_resultado.insert(0, "id", q_id)
