@@ -20,9 +20,6 @@ from agents.utils import format_final_response
 from config import GRAPH_RECURSION_LIMIT, validate_config
 from retrieval.hybrid import HybridRetriever
 
-JUDGE_MODEL = "ollama/qwen3.5:9b"
-OLLAMA_URL = "http://localhost:11434"
-
 PERGUNTAS_PATH = Path(__file__).resolve().parent / "perguntas.jsonl"
 
 APP_VERSION = "v1"  # mude a cada experimento para comparar no Leaderboard

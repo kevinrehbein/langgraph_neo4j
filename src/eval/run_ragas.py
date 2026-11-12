@@ -48,14 +48,14 @@ r = HybridRetriever.get_instance()
 emb = r.embedding_model
 
 gen_llm = init_chat_model(
-    model=os.getenv("GEN_MODEL", "gemma-4-26b-a4b-it"),
-    model_provider=os.getenv("GEN_PROVIDER", "google_genai"),
+    model="gemma-4-26b-a4b-it",
+    model_provider="google_genai",
     temperature=0,
     max_retries=5,
 )
 
 judge_llm = ChatOllama(
-    model=os.getenv("OLLAMA_MODEL", "qwen3.5:9b"),
+    model="qwen3.5:9b",
     reasoning=False,
     temperature=0,
     num_ctx=16384,
@@ -125,21 +125,67 @@ if __name__ == "__main__":
         ResponseRelevancy(llm=juiz, embeddings=juiz_emb),
     ]
 
-    res = {}
-    for nome, fn in {"semantico": semantico, "hibrido": hibrido}.items():
-        amostras = rodar(nome, fn, perguntas)
-        df = evaluate(
-            EvaluationDataset(samples=amostras),
-            metrics=metricas,
-            run_config=RunConfig(max_workers=1, timeout=600),
-        ).to_pandas()
-        df.insert(0, "id", [q["id"] for q in perguntas])
-        res[nome] = df
+    res_consolidados = {}
 
-    cols = list(res["semantico"].select_dtypes("number").columns)
-    tabela = pd.concat({k: v.set_index("id")[cols] for k, v in res.items()}, axis=1).round(3)
+    for nome, fn in {"semantico": semantico, "hibrido": hibrido}.items():
+        arquivo_csv = ROOT / f"ragas_{nome}.csv"
+        processados = set()
+
+        # Retomada de sessão: carrega os IDs já processados se o CSV existir
+        if arquivo_csv.exists():
+            df_existente = pd.read_csv(arquivo_csv)
+            if "id" in df_existente.columns:
+                processados = set(df_existente["id"].tolist())
+
+        print(f"\n--- Processando sistema: {nome} ---")
+
+        for q in perguntas:
+            q_id = q["id"]
+            if q_id in processados:
+                print(f"Pulando ID {q_id} (já processado).")
+                continue
+
+            # 1. Recuperação e Geração
+            chunks, rels = fn(emb.embed_query(q["pergunta"]))
+            prompt = PROMPT.format(
+                relacoes=f"{rels}\n" if rels else "",
+                contexto="\n\n".join(map(fmt, chunks)),
+                pergunta=q["pergunta"],
+            )
+            resposta = message_text(gen_llm.invoke(prompt))
+            print(f"ID {q_id} | Chunks: {len(chunks)} | Rels: {bool(rels)}", flush=True)
+
+            amostra = SingleTurnSample(
+                user_input=q["pergunta"],
+                response=resposta,
+                retrieved_contexts=[fmt(c) for c in chunks] + ([rels] if rels else []),
+            )
+
+            # 2. Avaliação de amostra única
+            df_resultado = evaluate(
+                EvaluationDataset(samples=[amostra]),
+                metrics=metricas,
+                run_config=RunConfig(max_workers=1, timeout=600),
+            ).to_pandas()
+
+            df_resultado.insert(0, "id", q_id)
+
+            # 3. Gravação passo a passo (Append)
+            incluir_cabecalho = not arquivo_csv.exists()
+            df_resultado.to_csv(arquivo_csv, mode="a", index=False, header=incluir_cabecalho)
+
+            processados.add(q_id)
+
+        # Carrega o dataset completo daquele sistema para a tabela final
+        res_consolidados[nome] = pd.read_csv(arquivo_csv)
+
+    # Gera a tabela final comparativa e as médias
+    cols = list(res_consolidados["semantico"].select_dtypes("number").columns)
+    if "id" in cols:
+        cols.remove("id") # Evita calcular média do ID caso ele seja numérico
+
+    tabela = pd.concat({k: v.set_index("id")[cols] for k, v in res_consolidados.items()}, axis=1).round(3)
     tabela.to_csv(ROOT / "ragas_por_pergunta.csv")
-    for k, v in res.items():
-        v.to_csv(ROOT / f"ragas_{k}.csv", index=False)  # inclui respostas para inspeção
+
     print("\nPor pergunta:\n", tabela)
-    print("\nMédia:\n", pd.DataFrame({k: v[cols].mean() for k, v in res.items()}).round(3))
+    print("\nMédia:\n", pd.DataFrame({k: v[cols].mean() for k, v in res_consolidados.items()}).round(3))
